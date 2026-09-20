@@ -11,7 +11,7 @@ if str(DASHBOARD_DIR) not in sys.path:
 
 
 st.set_page_config(
-    page_title="Batterie-Lernplattform",
+    page_title="Batterie Lernplattform",
     page_icon="🔋",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -91,9 +91,9 @@ st.markdown(
 )
 
 
-st.sidebar.markdown("## 🔋 Batterie-Lernplattform")
+st.sidebar.markdown("## 🔋 Batterie Lernplattform")
 st.sidebar.caption(
-    "Interaktive Analyse realer Messdaten eines 12-Zellen-Batteriemoduls"
+    "Interaktive Analyse realer Messdaten eines 12 Zellen Batteriemoduls"
 )
 
 st.sidebar.divider()
