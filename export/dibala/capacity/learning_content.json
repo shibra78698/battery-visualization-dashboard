@@ -1,0 +1,173 @@
+{
+  "topic": "Kapazitätstest",
+  "language": "de",
+  "learning_objectives": [
+    "Die Bedeutung der Batteriekapazität und ihrer Einheit Ah erklären.",
+    "Den Unterschied zwischen Kapazität und Energie erläutern.",
+    "Die Kapazität aus Strom- und Zeitdaten bestimmen.",
+    "Zellspannungsunterschiede innerhalb eines Batteriemoduls interpretieren.",
+    "Den Einfluss von Lade- und Entladevorgängen auf Spannung und Temperatur beurteilen."
+  ],
+  "factual_knowledge": [
+    {
+      "title": "Batteriekapazität",
+      "text": "Die Kapazität beschreibt die elektrische Ladungsmenge, die eine Batterie aufnehmen oder abgeben kann.",
+      "formula": "Q = ∫ I(t) dt",
+      "unit": "Ah"
+    },
+    {
+      "title": "Elektrische Energie",
+      "text": "Die elektrische Energie berücksichtigt neben dem Strom auch die Batteriespannung.",
+      "formula": "E = ∫ U(t) · I(t) dt",
+      "unit": "Wh"
+    },
+    {
+      "title": "Energieeffizienz",
+      "text": "Die Energieeffizienz beschreibt das Verhältnis zwischen abgegebener und zuvor aufgenommener Energie.",
+      "formula": "η_E = E_Entladung / E_Ladung · 100 %",
+      "unit": "%"
+    },
+    {
+      "title": "Zellspannungsdifferenz",
+      "text": "Die Zellspannungsdifferenz beschreibt den Abstand zwischen der höchsten und der niedrigsten Zellspannung zu einem Zeitpunkt.",
+      "formula": "ΔV = V_max - V_min",
+      "unit": "V oder mV"
+    }
+  ],
+  "conceptual_knowledge": [
+    {
+      "question": "Warum sinkt die Batteriespannung während der Entladung?",
+      "answer": "Während der Entladung verändert sich der Ladezustand der Zellen. Zusätzlich treten durch Innenwiderstand und elektrochemische Polarisation belastungsabhängige Spannungsabfälle auf."
+    },
+    {
+      "question": "Warum ist die Energieeffizienz kleiner als 100 %?",
+      "answer": "Beim Laden und Entladen treten Verluste auf. Dazu gehören unter anderem ohmsche Verluste, elektrochemische Verluste und Wärmeentwicklung."
+    },
+    {
+      "question": "Warum können sich die Spannungen einzelner Zellen unterscheiden?",
+      "answer": "Unterschiede können beispielsweise durch Ladezustand, Kapazität, Innenwiderstand, Temperatur oder Alterung entstehen."
+    },
+    {
+      "question": "Warum kann eine einzelne schwächere Zelle für das Modul relevant sein?",
+      "answer": "Bei einer Reihenschaltung fließt durch alle Zellen derselbe Strom. Erreicht eine Zelle ihre zulässige Spannungsgrenze früher als die anderen, kann sie den nutzbaren Betriebsbereich des gesamten Moduls begrenzen."
+    }
+  ],
+  "procedural_knowledge": [
+    {
+      "title": "Kapazität aus Messdaten bestimmen",
+      "steps": [
+        "Den relevanten Lade- oder Entladeabschnitt bestimmen.",
+        "Die Zeitdifferenzen zwischen aufeinanderfolgenden Messpunkten berechnen.",
+        "Den Strom über die Zeit numerisch integrieren.",
+        "Das Ergebnis von As in Ah umrechnen."
+      ],
+      "formula": "Q_Ah = (1 / 3600) · ∫ I(t) dt"
+    },
+    {
+      "title": "Energie aus Messdaten bestimmen",
+      "steps": [
+        "Spannung und Strom zeitlich zuordnen.",
+        "Die momentane Leistung P = U · I berechnen.",
+        "Die Leistung über die Zeit integrieren.",
+        "Das Ergebnis von J bzw. Ws in Wh umrechnen."
+      ],
+      "formula": "E_Wh = (1 / 3600) · ∫ U(t) · I(t) dt"
+    },
+    {
+      "title": "Zellspannungsstreuung bestimmen",
+      "steps": [
+        "Zu jedem Zeitpunkt die zwölf Zellspannungen vergleichen.",
+        "Die höchste Zellspannung bestimmen.",
+        "Die niedrigste Zellspannung bestimmen.",
+        "Die Differenz ΔV = V_max - V_min berechnen."
+      ],
+      "formula": "ΔV(t) = V_max(t) - V_min(t)"
+    }
+  ],
+  "transfer_tasks": [
+    {
+      "question": "Bei einem zweiten Batteriemodul ist die maximale Zellspannungsdifferenz während der Entladung deutlich größer. Welche möglichen Ursachen und Auswirkungen könnten dahinterstehen?",
+      "sample_answer": "Mögliche Ursachen sind Unterschiede im Ladezustand, in der Kapazität, im Innenwiderstand oder in der Temperatur einzelner Zellen. Eine größere Streuung kann dazu führen, dass eine Zelle früher eine Spannungsgrenze erreicht und dadurch der nutzbare Bereich des Moduls eingeschränkt wird."
+    },
+    {
+      "question": "Bei gleicher mittlerer Entladestromstärke steigt die Temperatur eines zweiten Moduls deutlich stärker. Wie könnte dieses Verhalten interpretiert werden?",
+      "sample_answer": "Eine stärkere Erwärmung kann unter anderem mit höheren Verlusten oder einem größeren Innenwiderstand zusammenhängen. Für eine eindeutige Diagnose wären jedoch weitere Messgrößen und Vergleichsdaten nötig."
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "capacity_q1",
+      "knowledge_type": "factual",
+      "difficulty": "leicht",
+      "question": "Welche Einheit wird üblicherweise für die Batteriekapazität verwendet?",
+      "options": [
+        "Volt",
+        "Ampere",
+        "Amperestunde",
+        "Watt"
+      ],
+      "correct_index": 2,
+      "explanation": "Die Kapazität beschreibt eine elektrische Ladungsmenge. Sie wird bei Batterien üblicherweise in Amperestunden (Ah) angegeben."
+    },
+    {
+      "id": "capacity_q2",
+      "knowledge_type": "conceptual",
+      "difficulty": "mittel",
+      "question": "Warum können zwei Batterien mit derselben Kapazität in Ah unterschiedliche Energien in Wh besitzen?",
+      "options": [
+        "Weil die Energie zusätzlich von der Spannung abhängt.",
+        "Weil die Kapazität immer temperaturunabhängig ist.",
+        "Weil Ah und Wh dieselbe physikalische Größe beschreiben.",
+        "Weil nur der Innenwiderstand die Energie bestimmt."
+      ],
+      "correct_index": 0,
+      "explanation": "Die Kapazität basiert im Wesentlichen auf der integrierten Strommenge. Für die Energie wird zusätzlich die Spannung berücksichtigt: E = ∫ U(t) · I(t) dt."
+    },
+    {
+      "id": "capacity_q3",
+      "knowledge_type": "procedural",
+      "difficulty": "mittel",
+      "question": "Welche Größe muss neben der Zeit bekannt sein, um die Kapazität durch Coulomb Counting zu bestimmen?",
+      "options": [
+        "Temperatur",
+        "Strom",
+        "Zellanzahl",
+        "Innenwiderstand"
+      ],
+      "correct_index": 1,
+      "explanation": "Beim Coulomb Counting wird der Strom über die Zeit integriert. Daher werden Strom I(t) und die zugehörigen Zeitinformationen benötigt."
+    },
+    {
+      "id": "capacity_q4",
+      "knowledge_type": "conceptual",
+      "difficulty": "fortgeschritten",
+      "question": "Welche Aussage über die Zelle mit der niedrigsten Spannung während der Entladung ist wissenschaftlich am sinnvollsten?",
+      "options": [
+        "Die Zelle ist eindeutig defekt.",
+        "Die Zelle besitzt sicher die kleinste Kapazität.",
+        "Die Zelle zeigt in diesem Test die niedrigste Spannung; die genaue Ursache erfordert weitere Untersuchungen.",
+        "Die Zelle hat zwangsläufig die höchste Temperatur."
+      ],
+      "correct_index": 2,
+      "explanation": "Aus einer niedrigen Zellspannung allein lässt sich die Ursache nicht eindeutig bestimmen. Mögliche Einflussgrößen sind zum Beispiel SOC, Kapazität, Innenwiderstand, Temperatur oder Alterung."
+    }
+  ],
+  "reflection_questions": [
+    {
+      "question": "Warum könnte Zelle 7 während des Entladevorgangs eine etwas niedrigere Spannung als die übrigen Zellen zeigen?",
+      "sample_answer": "Mögliche Gründe sind Unterschiede im Ladezustand, im Innenwiderstand, in der Kapazität oder in der Temperatur. Aus dem Spannungsverlauf allein lässt sich die Ursache jedoch nicht eindeutig bestimmen."
+    },
+    {
+      "question": "Warum sollten die kurzen Ladeereignisse nicht automatisch mit dem Hauptladevorgang zusammengefasst werden?",
+      "sample_answer": "Die Ereignisse gehören möglicherweise zu unterschiedlichen Abschnitten des Prüfablaufs. Für Kennwerte wie Energieeffizienz müssen daher die jeweils zusammengehörenden Lade- und Entladeabschnitte betrachtet werden."
+    }
+  ],
+  "key_takeaways": [
+    "Kapazität und Energie sind unterschiedliche physikalische Größen.",
+    "Kapazität wird aus dem Strom-Zeit-Verlauf bestimmt.",
+    "Energie berücksichtigt zusätzlich die Batteriespannung.",
+    "Lade- und Entladeereignisse müssen für die Auswertung eindeutig getrennt werden.",
+    "Zellspannungsunterschiede liefern Hinweise auf das Verhalten einzelner Zellen.",
+    "Ein einzelner Messwert erlaubt nicht automatisch eine eindeutige Diagnose des Zellzustands."
+  ]
+}

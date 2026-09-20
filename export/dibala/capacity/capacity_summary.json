@@ -1,0 +1,82 @@
+{
+  "test_type": "capacity",
+  "display_name": "Kapazitätstest",
+  "language": "de",
+  "module": {
+    "number_of_cells": 12
+  },
+  "capacity": {
+    "discharge_Ah": 140.4206019587384,
+    "recharge_Ah": 136.50560805567764,
+    "total_charge_Ah": 140.5006435163225,
+    "capacity_balance_pct": 99.94303118079682
+  },
+  "energy": {
+    "discharge_Wh": 6152.553412690727,
+    "recharge_Wh": 6218.899880170756,
+    "efficiency_pct": 98.93314784353456
+  },
+  "electrical": {
+    "minimum_module_voltage_V": 39.59968566894531,
+    "maximum_module_voltage_V": 50.34910202026367,
+    "mean_discharge_current_A": 52.00912856043779,
+    "mean_charge_current_A": 51.990252640764325
+  },
+  "cells": {
+    "weakest_cell": "cell_07_V",
+    "weakest_cell_voltage_V": 3.2939023971557617,
+    "maximum_spread_mV": 10.61868667602539,
+    "mean_spread_mV": 4.960502312057747
+  },
+  "temperature": {
+    "maximum_C": 31.163330078125,
+    "temperature_change_C": 5.000386555989582,
+    "maximum_spread_C": 0.642486572265625
+  },
+  "validation": {
+    "charge_capacity_difference_pct": 0.0005599110307385964,
+    "charge_energy_difference_pct": 0.0006770116713070234,
+    "discharge_capacity_difference_pct": 0.00029268334796626167,
+    "discharge_energy_difference_pct": 0.0002631510858019443,
+    "tester_energy_efficiency_pct": 98.93399810791016,
+    "energy_efficiency_difference_pct": 0.0008594258716532515
+  },
+  "kpi_explanations": {
+    "capacity": {
+      "discharge_Ah": "Während des Hauptentladeereignisses abgegebene elektrische Ladungsmenge. Der Wert wird durch Integration des Entladestroms über die Zeit bestimmt und in Amperestunden angegeben.",
+      "recharge_Ah": "Während des Hauptladeereignisses aufgenommene elektrische Ladungsmenge. In dieser Messung entspricht dies dem dritten und größten Ladeereignis.",
+      "total_charge_Ah": "Summe der geladenen Kapazität aus allen in der Messdatei identifizierten Ladeereignissen. Dieser Wert berücksichtigt somit auch die beiden kurzen zusätzlichen Ladeereignisse.",
+      "capacity_balance_pct": "Verhältnis der Entladekapazität des Hauptentladeereignisses zur gesamten geladenen Kapazität aller Ladeereignisse. Der Kennwert dient hier als Kapazitätsbilanz der Gesamtmessung und wird nicht automatisch als Coulomb-Wirkungsgrad interpretiert."
+    },
+    "energy": {
+      "discharge_Wh": "Während des Hauptentladeereignisses vom Batteriemodul abgegebene elektrische Energie. Sie wird aus dem zeitlichen Integral von Spannung und Strom bestimmt.",
+      "recharge_Wh": "Während des Hauptladeereignisses vom Batteriemodul aufgenommene elektrische Energie.",
+      "efficiency_pct": "Energieeffizienz des betrachteten Hauptzyklus. Sie ergibt sich aus dem Verhältnis der während der Hauptentladung abgegebenen Energie zur während des Hauptladeereignisses aufgenommenen Energie."
+    },
+    "electrical": {
+      "minimum_module_voltage_V": "Niedrigste gemessene Gesamtspannung des Batteriemoduls während des Hauptentladeereignisses.",
+      "maximum_module_voltage_V": "Höchste gemessene Gesamtspannung des Batteriemoduls während des betrachteten Hauptladeereignisses.",
+      "mean_discharge_current_A": "Mittlere Stromstärke während der aktiven Phase des Hauptentladeereignisses. Für die Darstellung wird der Betrag des Entladestroms verwendet.",
+      "mean_charge_current_A": "Mittlere Stromstärke während der aktiven Phase des Hauptladeereignisses."
+    },
+    "cells": {
+      "weakest_cell": "Bezeichnung der Zelle, die während der Hauptentladung die niedrigste Zellspannung erreicht hat. Der Kennwert beschreibt eine Beobachtung im vorliegenden Test und stellt keine eindeutige Diagnose des Zellzustands dar.",
+      "weakest_cell_voltage_V": "Niedrigste Zellspannung, die während der Hauptentladung unter allen gemessenen Zellen aufgetreten ist.",
+      "maximum_spread_mV": "Größte gleichzeitig auftretende Differenz zwischen der höchsten und der niedrigsten Zellspannung während der Hauptentladung.",
+      "mean_spread_mV": "Mittlere Zellspannungsdifferenz während der Hauptentladung. Für jeden Zeitpunkt wird zunächst die Differenz zwischen höchster und niedrigster Zellspannung bestimmt und anschließend über den betrachteten Zeitraum gemittelt."
+    },
+    "temperature": {
+      "maximum_C": "Höchste von den Batterietemperatursensoren gemessene Temperatur während des Hauptentladeereignisses.",
+      "temperature_change_C": "Änderung der mittleren Batterietemperatur zwischen Beginn und Ende des Hauptentladeereignisses.",
+      "maximum_spread_C": "Größter gleichzeitig auftretender Temperaturunterschied zwischen den Batterietemperatursensoren während der Hauptentladung. Der Kennwert beschreibt die thermische Gleichmäßigkeit zwischen den erfassten Sensorpositionen."
+    },
+    "validation": {
+      "charge_capacity_difference_pct": "Relative Abweichung zwischen der in Python berechneten Kapazität des Hauptladeereignisses und dem zugehörigen Prüfstandswert.",
+      "charge_energy_difference_pct": "Relative Abweichung zwischen der in Python berechneten Ladeenergie des Hauptladeereignisses und dem zugehörigen Prüfstandswert.",
+      "discharge_capacity_difference_pct": "Relative Abweichung zwischen der in Python berechneten Entladekapazität und dem entsprechenden Prüfstandswert. Für den Vergleich wird der Betrag des vom Prüfstand mit negativem Vorzeichen gespeicherten Entladewerts verwendet.",
+      "discharge_energy_difference_pct": "Relative Abweichung zwischen der in Python berechneten Entladeenergie und dem entsprechenden Prüfstandswert. Für die Validierung wird der Betrag des negativen Prüfstandswerts verwendet.",
+      "tester_energy_efficiency_pct": "Vom Batterietester gespeicherter Referenzwert für die Energieeffizienz des Hauptzyklus.",
+      "energy_efficiency_difference_pct": "Relative Abweichung zwischen der in Python berechneten Energieeffizienz und dem vom Prüfstand gespeicherten Referenzwert."
+    }
+  }
+}
