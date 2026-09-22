@@ -27,11 +27,35 @@ st.markdown(
         padding-bottom: 4rem;
     }
 
+    .dashboard-header {
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(120, 140, 170, 0.22);
+        border-radius: 16px;
+        background: linear-gradient(
+            110deg,
+            rgba(224, 242, 254, 0.80),
+            rgba(237, 233, 254, 0.65)
+        );
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        margin-top: 0.45rem;
+        margin-bottom: 0;
+        opacity: 0.75;
+    }
+
     [data-testid="stMetric"] {
-        background: rgba(248, 250, 252, 0.75);
+        padding: 1rem 1.1rem;
         border: 1px solid rgba(130, 145, 160, 0.25);
         border-radius: 14px;
-        padding: 16px 18px;
+        background-color: rgba(248, 250, 252, 0.78);
     }
 
     [data-testid="stMetricLabel"] {
@@ -42,48 +66,12 @@ st.markdown(
         border-radius: 14px;
     }
 
-    .dashboard-header {
-        padding: 1.3rem 1.5rem;
-        border-radius: 16px;
-        background: linear-gradient(
-            110deg,
-            rgba(224, 242, 254, 0.75),
-            rgba(237, 233, 254, 0.65)
-        );
-        border: 1px solid rgba(120, 140, 170, 0.22);
-        margin-bottom: 1.5rem;
-    }
-
-    .dashboard-header h1 {
-        margin: 0;
-        font-size: 2rem;
-    }
-
-    .dashboard-header p {
-        margin-top: 0.4rem;
-        margin-bottom: 0;
-        opacity: 0.78;
-    }
-
-    .learning-box {
-        padding: 1rem 1.2rem;
-        border-radius: 12px;
-        border-left: 4px solid #4f7cac;
-        background: rgba(239, 246, 255, 0.7);
-        margin: 0.7rem 0;
-    }
-
-    .small-note {
-        opacity: 0.72;
-        font-size: 0.9rem;
-    }
-
     div.stButton > button {
-        border-radius: 10px;
+        border-radius: 9px;
     }
 
     div[data-baseweb="tab-list"] {
-        gap: 0.4rem;
+        gap: 0.35rem;
     }
     </style>
     """,
@@ -92,11 +80,9 @@ st.markdown(
 
 
 st.sidebar.markdown("## 🔋 Batterie Lernplattform")
-st.sidebar.caption(
-    "Interaktive Analyse realer Messdaten eines 12 Zellen Batteriemoduls"
-)
-
+st.sidebar.caption("Interaktive Analyse realer Batteriemessdaten")
 st.sidebar.divider()
+
 
 pages = [
     st.Page(
@@ -121,6 +107,7 @@ pages = [
         icon="⚡",
     ),
 ]
+
 
 navigation = st.navigation(pages)
 navigation.run()

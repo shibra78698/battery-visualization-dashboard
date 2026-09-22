@@ -3,7 +3,8 @@
   "display_name": "Kapazitätstest",
   "language": "de",
   "module": {
-    "number_of_cells": 12
+    "number_of_cells": 12,
+    "system_type": "module"
   },
   "capacity": {
     "discharge_Ah": 140.4206019587384,

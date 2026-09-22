@@ -1,40 +1,68 @@
 import streamlit as st
 
-from data_loader import load_capacity_data
+#from data_loader import load_capacity_data
+from data_loader import (
+    load_capacity_data,
+    select_capacity_test,
+)
 
-
-def format_de(value, decimals=2):
+def format_number(value, decimals=2):
     if value is None:
         return "–"
 
     text = f"{value:,.{decimals}f}"
-
-    return (
-        text
-        .replace(",", "X")
-        .replace(".", ",")
-        .replace("X", ".")
-    )
+    return text.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-data = load_capacity_data()
+def get_system_name(number_of_cells):
+    if number_of_cells == 1:
+        return "Einzelzelle"
+
+    if number_of_cells > 1:
+        return f"{number_of_cells} Zellen Batteriemodul"
+
+    return "Batteriesystem"
+
+
+selected_test = select_capacity_test()
+
+data = load_capacity_data(
+    selected_test
+)
+
 summary = data["summary"]
+
+number_of_cells = summary.get("module", {}).get("number_of_cells", 0)
+system_name = get_system_name(number_of_cells)
+
+discharge_capacity = summary["capacity"]["discharge_Ah"]
+discharge_energy_kwh = summary["energy"]["discharge_Wh"] / 1000
+energy_efficiency = summary["energy"]["efficiency_pct"]
+max_temperature = summary["temperature"]["maximum_C"]
 
 
 st.markdown(
-    """
+    f"""
     <div class="dashboard-header">
-        <h1>Interaktive Batterie-Datenanalyse</h1>
+        <h1>Interaktive Batterie Datenanalyse</h1>
         <p>
-            Analyse und didaktische Aufbereitung realer Messdaten
-            eines 12 Zellen Batteriemoduls
+            Analyse und didaktische Aufbereitung realer Messdaten:
+            {system_name}
         </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+source_file = summary.get(
+    "source_file"
+)
 
+if source_file:
+    st.caption(
+        f"Aktuelle Messdatei: {source_file}"
+    )
+    
 st.subheader("Überblick")
 
 st.write(
@@ -42,77 +70,127 @@ st.write(
     Die Anwendung verbindet die Auswertung realer Batteriemessdaten
     mit interaktiven Visualisierungen und didaktischen Elementen.
     Die analytischen Berechnungen werden vollständig im Python-Backend
-    durchgeführt. Das Dashboard verwendet ausschließlich die bereits
-    berechneten und exportierten Ergebnisse.
+    durchgeführt. Das Dashboard greift auf die bereits berechneten und
+    exportierten Ergebnisse zu.
     """
 )
 
 
-c1, c2, c3, c4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
-with c1:
+with col1:
     st.metric(
         "Entladekapazität",
-        f"{format_de(summary['capacity']['discharge_Ah'], 2)} Ah",
+        f"{format_number(discharge_capacity, 2)} Ah",
     )
 
-with c2:
+with col2:
     st.metric(
         "Entladeenergie",
-        f"{format_de(summary['energy']['discharge_Wh'] / 1000, 2)} kWh",
+        f"{format_number(discharge_energy_kwh, 2)} kWh",
     )
 
-with c3:
+with col3:
     st.metric(
         "Energieeffizienz",
-        f"{format_de(summary['energy']['efficiency_pct'], 2)} %",
+        f"{format_number(energy_efficiency, 2)} %",
     )
 
-with c4:
+with col4:
+    if number_of_cells > 1:
+        max_cell_spread = summary["cells"]["maximum_spread_mV"]
+
+        st.metric(
+            "Max. Zellspannungsdifferenz",
+            f"{format_number(max_cell_spread, 2)} mV",
+        )
+
+    elif number_of_cells == 1:
+        min_cell_voltage = summary["cells"]["weakest_cell_voltage_V"]
+
+        st.metric(
+            "Minimale Zellspannung",
+            f"{format_number(min_cell_voltage, 4)} V",
+        )
+
+    else:
+        st.metric(
+            "Zellspannungen",
+            "–",
+        )
+
+with col5:
     st.metric(
-        "Max. Zellstreuung",
-        f"{format_de(summary['cells']['maximum_spread_mV'], 2)} mV",
+        "Maximale Temperatur",
+        f"{format_number(max_temperature, 2)} °C",
     )
 
 
 st.divider()
 
-st.subheader("Mess- und Lernbereiche")
+st.subheader("Mess- und Analysebereiche")
 
 capacity_col, ocv_col, discharge_col = st.columns(3)
+
 
 with capacity_col:
     with st.container(border=True):
         st.markdown("### 🔋 Kapazitätstest")
+
         st.write(
             """
-            Kapazität, Energie, Wirkungsgrad, Zellspannungen
-            und thermisches Verhalten.
+            Kapazität, Energie, Wirkungsgrad, elektrisches Verhalten,
+            Zellspannungen und thermisches Verhalten.
             """
         )
+
         st.success("Analyse verfügbar")
+
 
 with ocv_col:
     with st.container(border=True):
         st.markdown("### 📈 OCV-Verhalten")
+
         st.write(
             """
-            Leerlaufspannung, Relaxationsverhalten und
-            Zusammenhang zwischen OCV und Ladezustand.
+            Leerlaufspannung, Relaxationsverhalten und Zusammenhang
+            zwischen OCV und Ladezustand.
             """
         )
+
         st.info("Wird im nächsten Arbeitsschritt ergänzt")
+
 
 with discharge_col:
     with st.container(border=True):
         st.markdown("### ⚡ Entladung & EIS")
+
         st.write(
             """
             Dynamisches Entladeverhalten, Spannungsabfall,
             Innenwiderstand und Impedanzanalyse.
             """
         )
+
         st.info("Wird nach der OCV-Analyse ergänzt")
+
+
+st.divider()
+
+st.subheader("Aktuelle Messung")
+
+with st.container(border=True):
+    st.write(
+        f"**Untersuchtes System:** {system_name}"
+    )
+
+    st.write(
+        f"**Erkannte Zellspannungssignale:** {number_of_cells}"
+    )
+
+    st.write(
+        "**Aktuell verfügbare Analyse:** Kapazitätstest"
+    )
 
 
 st.divider()
@@ -121,43 +199,57 @@ st.subheader("Didaktisches Konzept")
 
 st.write(
     """
-    Die Lerninhalte werden auf mehreren Ebenen angeboten.
-    Neben grundlegenden Fakten werden Zusammenhänge erklärt,
-    Berechnungsmethoden schrittweise dargestellt und Aufgaben
-    zur Übertragung des Wissens auf neue Situationen angeboten.
+    Die Lerninhalte sind so aufgebaut, dass neben grundlegenden Fakten
+    auch Zusammenhänge, Auswertungsmethoden und die Übertragung des
+    Wissens auf neue Messsituationen behandelt werden.
     """
 )
 
+
 d1, d2, d3, d4 = st.columns(4)
+
 
 with d1:
     with st.container(border=True):
         st.markdown("**Faktenwissen**")
+
         st.caption(
-            "Definitionen, Formeln, Einheiten und grundlegende Begriffe"
+            "Definitionen, Formeln, Einheiten und Grundbegriffe"
         )
+
 
 with d2:
     with st.container(border=True):
         st.markdown("**Konzeptwissen**")
+
         st.caption(
-            "Zusammenhänge verstehen und Warum-Fragen beantworten"
+            "Zusammenhänge verstehen und begründen"
         )
+
 
 with d3:
     with st.container(border=True):
         st.markdown("**Prozedurales Wissen**")
+
         st.caption(
             "Berechnungen und Auswertungsmethoden nachvollziehen"
         )
 
+
 with d4:
     with st.container(border=True):
         st.markdown("**Wissenstransfer**")
+
         st.caption(
             "Gelerntes auf neue Messsituationen übertragen"
         )
 
 
 st.divider()
+
+st.caption(
+    "Die Datenanalyse erfolgt vollständig in Python. "
+    "Die Ergebnisse werden über strukturierte CSV- und JSON-Dateien "
+    "für Streamlit und die spätere Integration in DiBaLa bereitgestellt."
+)
 
