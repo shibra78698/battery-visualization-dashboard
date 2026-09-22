@@ -1,0 +1,21 @@
+{
+  "interface_version": "1.0",
+  "language": "de",
+  "test_id": "report_vw_id4_module_modultester_mcu2_2025-06-06_22_31_30_kapazit_tstest",
+  "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-06_22.31.30_Kapazitätstest.mf4",
+  "test_type": "capacity",
+  "display_name": "Kapazitätstest",
+  "files": {
+    "summary": "capacity_summary.json",
+    "electrical": "electrical.csv",
+    "cells": "cells.csv",
+    "temperature": "temperature.csv",
+    "events": "events.csv",
+    "learning": "learning_content.json"
+  },
+  "notes": {
+    "analysis": "Alle Kennwerte werden in Python aus den vollständigen Messdaten berechnet.",
+    "visualization": "Die CSV-Dateien können für die Visualisierung reduziert sein und enthalten daher nicht zwingend jeden Rohdatenpunkt.",
+    "unity": "Unity bzw. DiBaLa soll die exportierten Ergebnisse visualisieren, aber keine Kennwerte neu berechnen."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "test_type": "capacity",
+  "display_name": "Kapazitätstests",
+  "number_of_tests": 1,
+  "tests": [
+    {
+      "id": "report_vw_id4_module_modultester_mcu2_2025-06-06_22_31_30_kapazit_tstest",
+      "display_name": "Report VW ID4 Module Modultester MCU2 2025 06 06 22.31.30 Kapazitätstest",
+      "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-06_22.31.30_Kapazitätstest.mf4",
+      "number_of_cells": 12,
+      "folder": "report_vw_id4_module_modultester_mcu2_2025-06-06_22_31_30_kapazit_tstest"
+    }
+  ]
+}
