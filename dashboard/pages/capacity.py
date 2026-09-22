@@ -5,11 +5,12 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-from data_loader import (
+from dashboard.data_loader import (
     load_capacity_data,
     capacity_export_path,
     select_capacity_test,
 )
+#from data_loader import (load_capacity_data,capacity_export_path,select_capacity_test,)
 
 
 def format_number(value, decimals=2):
