@@ -5,6 +5,10 @@ import streamlit as st
 
 
 DASHBOARD_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = DASHBOARD_DIR.parent
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 if str(DASHBOARD_DIR) not in sys.path:
     sys.path.insert(0, str(DASHBOARD_DIR))
