@@ -1,11 +1,8 @@
 import streamlit as st
 
 #from data_loader import load_capacity_data
-from dashboard.data_loader import (
-    load_capacity_data,
-    select_capacity_test,
-)
-#from data_loader import (load_capacity_data,select_capacity_test,)
+#from dashboard.data_loader import (load_capacity_data,select_capacity_test,)
+from data_loader import (load_capacity_data,select_capacity_test,)
 
 def format_number(value, decimals=2):
     if value is None:

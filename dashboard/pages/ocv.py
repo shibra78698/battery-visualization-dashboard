@@ -15,8 +15,7 @@ st.markdown(
 
 
 st.info(
-    "Die OCV-Analyse wird nach Abschluss der "
-    "Kapazitätsseite implementiert."
+    "Als Naechstes geplant."
 )
 
 
@@ -26,13 +25,9 @@ with st.container(border=True):
     st.markdown(
         """
         **Analyse**
+        ...
 
-        - Erkennung von Ruhephasen
-        - Bestimmung stabiler OCV-Werte
-        - Vergleich der OCV-Messungen
-        - OCV in Abhängigkeit von SOC bzw. DoD
-        - Zellspannungsvergleich während der Ruhephasen
-        - Relaxationsverhalten
+        
         """
     )
 
@@ -42,9 +37,15 @@ with st.container(border=True):
         **Didaktik**
 
         - Was ist die Leerlaufspannung?
-        - Warum muss die Batterie für eine OCV-Messung ruhen?
-        - Zusammenhang zwischen OCV und Ladezustand
-        - Schrittweise Bestimmung eines OCV-Punktes
+        -... etc..
         - Quiz, Reflexionsfragen und Transferaufgaben
         """
     )
+
+
+#Erkennung von Ruhephase
+#Bestimmung stabiler OCV-Werte
+#Vergleich der OCV-Messungen
+#OCV in Abhängigkeit von SOC bzw. DoD
+#Zellspannungsvergleich während der Ruhephasen
+#Relaxationsverhalten    
