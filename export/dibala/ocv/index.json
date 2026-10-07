@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "test_type": "ocv",
+  "number_of_tests": 5,
+  "comparison_file": "temperature_comparison.csv",
+  "comparison_learning_file": "comparison_learning_content.json",
+  "tests": [
+    {
+      "test_id": "ocv_-5",
+      "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_-5.mf4",
+      "temperature_C": -4.999874453954641,
+      "number_of_cells": 12,
+      "folder": "ocv_-5",
+      "manifest": "ocv_-5/manifest.json",
+      "summary": "ocv_-5/ocv_summary.json",
+      "learning_content": "ocv_-5/learning_content.json"
+    },
+    {
+      "test_id": "ocv_0",
+      "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_0.mf4",
+      "temperature_C": 9.346333996013719e-05,
+      "number_of_cells": 12,
+      "folder": "ocv_0",
+      "manifest": "ocv_0/manifest.json",
+      "summary": "ocv_0/ocv_summary.json",
+      "learning_content": "ocv_0/learning_content.json"
+    },
+    {
+      "test_id": "ocv_10",
+      "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_10.mf4",
+      "temperature_C": 9.99999112543762,
+      "number_of_cells": 12,
+      "folder": "ocv_10",
+      "manifest": "ocv_10/manifest.json",
+      "summary": "ocv_10/ocv_summary.json",
+      "learning_content": "ocv_10/learning_content.json"
+    },
+    {
+      "test_id": "ocv_25",
+      "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_25.mf4",
+      "temperature_C": 25.000492568986633,
+      "number_of_cells": 12,
+      "folder": "ocv_25",
+      "manifest": "ocv_25/manifest.json",
+      "summary": "ocv_25/ocv_summary.json",
+      "learning_content": "ocv_25/learning_content.json"
+    },
+    {
+      "test_id": "ocv_40",
+      "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_40.mf4",
+      "temperature_C": 39.99965966947285,
+      "number_of_cells": 12,
+      "folder": "ocv_40",
+      "manifest": "ocv_40/manifest.json",
+      "summary": "ocv_40/ocv_summary.json",
+      "learning_content": "ocv_40/learning_content.json"
+    }
+  ]
+}

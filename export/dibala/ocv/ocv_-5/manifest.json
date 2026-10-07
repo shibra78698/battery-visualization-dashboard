@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "test_type": "ocv",
+  "test_id": "ocv_-5",
+  "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_-5.mf4",
+  "temperature_C": -4.999874453954641,
+  "number_of_cells": 12,
+  "analysis": {
+    "kpis_calculated_from_full_resolution_data": true,
+    "visualization_data_downsampled": true,
+    "maximum_visualization_rows": 10000,
+    "native_timestamps_used_for_analysis": true
+  },
+  "files": {
+    "summary": "ocv_summary.json",
+    "learning_content": "learning_content.json",
+    "electrical": {
+      "file": "electrical.csv",
+      "rows": 9998,
+      "columns": 12
+    },
+    "discharge": {
+      "file": "discharge.csv",
+      "rows": 9998,
+      "columns": 10
+    },
+    "relaxation": {
+      "file": "relaxation.csv",
+      "rows": 8898,
+      "columns": 7
+    },
+    "cells": {
+      "file": "cells.csv",
+      "rows": 9998,
+      "columns": 19
+    },
+    "temperature": {
+      "file": "temperature.csv",
+      "rows": 9998,
+      "columns": 9
+    },
+    "phases": {
+      "file": "phases.csv",
+      "rows": 5,
+      "columns": 15
+    }
+  }
+}

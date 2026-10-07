@@ -1,0 +1,534 @@
+{
+  "schema_version": "1.0",
+  "language": "de",
+  "topic": "ocv_relaxation",
+  "scope": "single_test",
+  "display_references": false,
+  "learning_objectives": [
+    {
+      "id": "ocv_objective_01",
+      "knowledge_type": "factual",
+      "text": "Die Bedeutung von OCV und Spannungsrelaxation beschreiben."
+    },
+    {
+      "id": "ocv_objective_02",
+      "knowledge_type": "conceptual",
+      "text": "Den Unterschied zwischen der Klemmenspannung unter Last und einer relaxierten Spannung erklären."
+    },
+    {
+      "id": "ocv_objective_03",
+      "knowledge_type": "procedural",
+      "text": "Hauptentladung und Relaxationsphase anhand des Stromverlaufs unterscheiden."
+    },
+    {
+      "id": "ocv_objective_04",
+      "knowledge_type": "conceptual",
+      "text": "Den Einfluss der Temperatur auf Entlade- und Relaxationsverhalten kritisch interpretieren."
+    },
+    {
+      "id": "ocv_objective_05",
+      "knowledge_type": "procedural",
+      "text": "Kapazität, Energie und Spannungserholung anhand der berechneten Kennwerte interpretieren."
+    },
+    {
+      "id": "ocv_objective_06",
+      "knowledge_type": "transfer",
+      "text": "Die Auswertungsmethode auf neue Messbedingungen und Module mit anderer Zellzahl übertragen."
+    }
+  ],
+  "theory": [
+    {
+      "id": "ocv_theory_01",
+      "title": "Was bedeutet OCV?",
+      "text": "Die Open Circuit Voltage beschreibt die Klemmenspannung einer Batterie im stromlosen und ausreichend relaxierten Zustand. Sie besitzt einen Zusammenhang mit dem Ladezustand der Batterie.",
+      "source_ids": [
+        "weng_2014",
+        "pakjoo_2026"
+      ]
+    },
+    {
+      "id": "ocv_theory_02",
+      "title": "Warum ist die Lastspannung nicht automatisch OCV?",
+      "text": "Während Strom fließt, wird die gemessene Klemmenspannung durch lastabhängige Spannungsanteile und Polarisation beeinflusst. Deshalb unterscheidet sie sich von einer ausreichend relaxierten Spannung.",
+      "source_ids": [
+        "pakjoo_2026"
+      ]
+    },
+    {
+      "id": "ocv_theory_03",
+      "title": "Warum steigt die Spannung nach der Entladung wieder an?",
+      "text": "Nach dem Abschalten des Entladestroms fallen lastabhängige Spannungsanteile weg. Gleichzeitig relaxieren Polarisations- und Transportprozesse. Dadurch steigt die Klemmenspannung nach der Entladung typischerweise wieder an und verändert sich danach langsamer weiter.",
+      "source_ids": [
+        "fernando_relaxation_2024",
+        "jorkesh_2026",
+        "pakjoo_2026"
+      ]
+    },
+    {
+      "id": "ocv_theory_04",
+      "title": "Warum spielt die Temperatur eine Rolle?",
+      "text": "Die Temperatur beeinflusst das elektrische und elektrochemische Verhalten einer Batterie. Besonders bei niedrigen Temperaturen können stärkere Polarisationseffekte dazu führen, dass Spannungsgrenzen früher erreicht werden und sich das beobachtete Entladeverhalten ändert.",
+      "source_ids": [
+        "nguyen_2026",
+        "fernando_dataset_2024"
+      ]
+    },
+    {
+      "id": "ocv_theory_05",
+      "title": "Warum kann die Spannungserholung bei niedriger Temperatur stärker sein?",
+      "text": "Eine mögliche Erklärung ist eine stärkere Polarisation unter niedrigen Temperaturen. Nach dem Abschalten des Stroms kann deshalb ein größerer lastabhängiger Spannungsanteil zurückgehen. Die beobachtete Spannungserholung darf jedoch nicht ausschließlich der Temperatur zugeschrieben werden, da auch Entladezustand und vorherige Belastung relevant sind.",
+      "source_ids": [
+        "nguyen_2026",
+        "fernando_dataset_2024",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_theory_06",
+      "title": "Warum wird die erste Ruhespannung nicht sofort als OCV bezeichnet?",
+      "text": "Nach der Stromabschaltung verändert sich die Spannung weiterhin mit der Zeit. Eine stromlose Messung bedeutet deshalb nicht automatisch, dass bereits ein vollständiger Gleichgewichtszustand erreicht wurde.",
+      "source_ids": [
+        "pakjoo_2026",
+        "jorkesh_2026"
+      ]
+    }
+  ],
+  "kpi_explanations": {
+    "test_temperature_C": {
+      "title": "Prüftemperatur",
+      "value": 25.000492568986633,
+      "unit": "°C",
+      "short": "Mittlere Klimatemperatur während des Versuchs.",
+      "interpretation": "Sie beschreibt die thermische Versuchsbedingung und dient als Grundlage für den Vergleich verschiedener Messungen."
+    },
+    "discharge_duration_h": {
+      "title": "Entladedauer",
+      "value": 8.871699999999999,
+      "unit": "h",
+      "short": "Dauer der automatisch erkannten Hauptentladung.",
+      "interpretation": "Bei ähnlichem Entladestrom kann eine unterschiedliche Entladedauer auf unterschiedlich lange nutzbare Entladung bis zum Messende hinweisen."
+    },
+    "discharge_capacity_Ah": {
+      "title": "Entnommene Ladung",
+      "value": 138.48420768380706,
+      "unit": "Ah",
+      "short": "Während der Hauptentladung entnommene Ladungsmenge.",
+      "formula": "Q = -1/3600 · ∫ I(t) dt",
+      "interpretation": "Der Wert beschreibt die unter den jeweiligen Versuchsbedingungen entnommene Ladung. Er sollte nicht ohne weitere Informationen direkt mit der Nennkapazität gleichgesetzt werden."
+    },
+    "discharge_energy_Wh": {
+      "title": "Entnommene Energie",
+      "value": 6112.013249579317,
+      "unit": "Wh",
+      "short": "Während der Hauptentladung abgegebene elektrische Energie.",
+      "formula": "E = -1/3600 · ∫ U(t) · I(t) dt",
+      "interpretation": "Die Energie berücksichtigt neben der entnommenen Ladung auch das Spannungsniveau während der Entladung."
+    },
+    "total_recovery_V": {
+      "title": "Gesamte Spannungserholung",
+      "value": 0.4767036437988281,
+      "unit": "V",
+      "short": "Spannungsanstieg vom letzten Lastpunkt bis zum Ende der aufgezeichneten Relaxation.",
+      "formula": "ΔV_total = V_relax,end - V_load,end",
+      "interpretation": "Ein größerer Wert bedeutet eine stärkere beobachtete Spannungserholung. Daraus allein kann jedoch keine eindeutige Ursache abgeleitet werden."
+    },
+    "immediate_recovery_V": {
+      "title": "Sofortige Spannungserholung",
+      "value": 0.11585235595703125,
+      "unit": "V",
+      "short": "Spannungsänderung zwischen dem letzten Lastpunkt und dem ersten Messpunkt der Ruhephase.",
+      "formula": "ΔV_immediate = V_relax,start - V_load,end",
+      "interpretation": "Der Wert beschreibt den sehr frühen Anteil der beobachteten Spannungserholung."
+    },
+    "slow_relaxation_V": {
+      "title": "Weitere Spannungsrelaxation",
+      "value": 0.3608512878417969,
+      "unit": "V",
+      "short": "Weitere Spannungsänderung während der aufgezeichneten Ruhephase.",
+      "formula": "ΔV_slow = V_relax,end - V_relax,start",
+      "interpretation": "Sie zeigt, wie stark sich die Spannung nach dem ersten Ruhepunkt noch weiter verändert."
+    },
+    "relaxation_60min_V": {
+      "title": "Spannung nach 60 Minuten",
+      "value": 40.05687253410339,
+      "unit": "V",
+      "short": "Modulspannung 60 Minuten nach Beginn der Relaxationsphase.",
+      "interpretation": "Dieser gemeinsame Zeitpunkt ermöglicht einen zeitlich vergleichbareren Vergleich zwischen Messungen mit unterschiedlich langen Relaxationsphasen."
+    },
+    "final_10min_slope": {
+      "title": "Spannungsgradient am Ende",
+      "value": 0.8492607249840304,
+      "unit": "mV/min",
+      "short": "Mittlere Änderung der Spannung während der letzten zehn Minuten der Relaxation.",
+      "interpretation": "Ein kleiner Betrag deutet auf einen flacheren Spannungsverlauf hin. Er wird hier nicht als festes Kriterium für Gleichgewichts-OCV verwendet."
+    },
+    "lowest_cell_voltage_V": {
+      "title": "Niedrigste Zellspannung",
+      "value": 3.286094903945923,
+      "unit": "V",
+      "short": "Niedrigster gemessener Zellspannungswert während der Hauptentladung.",
+      "interpretation": "Die Kennzahl hilft, auffällige Einzelzellen während der Entladung zu erkennen."
+    },
+    "maximum_cell_spread_discharge_mV": {
+      "title": "Maximale Zellspannungsdifferenz",
+      "value": 22.74036407470703,
+      "unit": "mV",
+      "short": "Größte Differenz zwischen der höchsten und niedrigsten Zellspannung während der Entladung.",
+      "formula": "ΔV_cell = V_max - V_min",
+      "interpretation": "Die Kennzahl beschreibt, wie weit die Einzelzellspannungen innerhalb des Moduls zeitweise auseinanderliegen."
+    },
+    "cell_spread_relaxation_60min_mV": {
+      "title": "Zellspannungsdifferenz nach 60 Minuten",
+      "value": 19.372740188156435,
+      "unit": "mV",
+      "short": "Differenz zwischen höchster und niedrigster Zellspannung nach 60 Minuten Relaxation.",
+      "interpretation": "Der Vergleich mit dem Spread unter Last zeigt, wie sich die Zellspannungsunterschiede im Ruhezustand entwickeln."
+    }
+  },
+  "graph_explanations": [
+    {
+      "id": "voltage_current_time",
+      "title": "Spannung und Strom über der Zeit",
+      "what": "Die Grafik zeigt den Verlauf von Modulspannung und Strom während des gesamten Versuchs.",
+      "focus": "Es ist besonders auf den Übergang von der Hauptentladung zur Relaxationsphase zu achten.",
+      "interpretation": "Nach dem Abschalten des Entladestroms steigt die Klemmenspannung wieder an. Die erste Ruhespannung ist jedoch nicht automatisch eine vollständig eingestellte Gleichgewichts-OCV.",
+      "hover_help": "Beim Überfahren der Kurve sollen Zeit, Spannung, Strom und die aktuelle Versuchsphase angezeigt werden.",
+      "hover_fields": [
+        "Zeit",
+        "Spannung",
+        "Strom",
+        "Phase"
+      ],
+      "source_ids": [
+        "pakjoo_2026",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "voltage_relative_discharge",
+      "title": "Spannung über relativem Entladefortschritt",
+      "what": "Die Grafik zeigt, wie sich die Modulspannung während der Hauptentladung verändert.",
+      "focus": "Es ist insbesondere den Spannungsverlauf gegen Ende der Entladung zu achten.",
+      "interpretation": "Der relative Entladefortschritt bezieht sich auf die in diesem Versuch entnommene Ladungsmenge und ist nicht mit einem absoluten SOC gleichzusetzen.",
+      "hover_help": "Beim Überfahren sollen relativer Entladefortschritt, Spannung, Strom und entnommene Ladung angezeigt werden.",
+      "hover_fields": [
+        "Entladefortschritt",
+        "Spannung",
+        "Strom",
+        "Entnommene Ladung"
+      ],
+      "source_ids": [
+        "weng_2014"
+      ]
+    },
+    {
+      "id": "relaxation_voltage_time",
+      "title": "Spannungsrelaxation über der Zeit",
+      "what": "Die Grafik zeigt die Modulspannung ab Beginn der Relaxationsphase.",
+      "focus": "Es ist insbesondere den Spannungsverlauf gegen Ende der Relaxationsphase zu achten.",
+      "interpretation": "Eine zunehmend flache Kurve zeigt eine langsamere weitere Spannungsänderung. Daraus folgt nicht automatisch, dass bereits vollständiges Gleichgewicht erreicht wurde.",
+      "hover_help": "Beim Überfahren sollen Relaxationszeit, Spannung, Strom und bisherige Spannungserholung angezeigt werden.",
+      "hover_fields": [
+        "Relaxationszeit",
+        "Spannung",
+        "Strom",
+        "Spannungserholung"
+      ],
+      "source_ids": [
+        "fernando_relaxation_2024",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "cell_voltages",
+      "title": "Einzelzellspannungen",
+      "what": "Die Grafik zeigt die Spannungsverläufe der ausgewählten Einzelzellen.",
+      "focus": "Achte darauf, ob einzelne Zellen unter Last stärker absinken und wie sie sich während der Relaxation verhalten.",
+      "interpretation": "Einzelzellverläufe helfen, Unterschiede innerhalb eines Batteriemoduls sichtbar zu machen. Aus einer Abweichung allein wird noch keine Fehlerursache abgeleitet.",
+      "hover_help": "Beim Überfahren sollen Zeit, Zellspannung, Zellname und Versuchsphase angezeigt werden.",
+      "hover_fields": [
+        "Zeit",
+        "Zelle",
+        "Zellspannung",
+        "Phase"
+      ],
+      "source_ids": []
+    },
+    {
+      "id": "cell_spread",
+      "title": "Zellspannungsdifferenz",
+      "what": "Die Grafik zeigt die Differenz zwischen der jeweils höchsten und niedrigsten Zellspannung.",
+      "focus": "Vergleiche den Zellspread während der Entladung mit dem Spread während der Relaxation.",
+      "interpretation": "Der Zellspread beschreibt die momentane Streuung der Zellspannungen innerhalb des Moduls.",
+      "hover_help": "Beim Überfahren sollen Zeit, Zellspread und Phase angezeigt werden.",
+      "hover_fields": [
+        "Zeit",
+        "Zellspannungsdifferenz",
+        "Phase"
+      ],
+      "source_ids": []
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "ocv_quiz_01",
+      "knowledge_type": "factual",
+      "question": "Was beschreibt die Open-Circuit Voltage am besten?",
+      "options": [
+        "Die Spannung einer Batterie unter maximaler Belastung.",
+        "Die Klemmenspannung im stromlosen und ausreichend relaxierten Zustand.",
+        "Die höchste Zellspannung während einer Entladung.",
+        "Die elektrische Leistung einer Batterie."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Für die OCV ist ein stromloser und ausreichend relaxierter Zustand relevant.",
+      "feedback_incorrect": "Achte auf den Unterschied zwischen Spannung unter Last und Spannung nach ausreichender Relaxation.",
+      "explanation": "Die unter Last gemessene Klemmenspannung enthält lastabhängige Spannungsanteile und ist deshalb nicht automatisch OCV.",
+      "source_ids": [
+        "weng_2014",
+        "pakjoo_2026"
+      ]
+    },
+    {
+      "id": "ocv_quiz_02",
+      "knowledge_type": "conceptual",
+      "question": "Warum steigt die Modulspannung nach dem Abschalten des Entladestroms wieder an?",
+      "options": [
+        "Weil die Batterie automatisch geladen wird.",
+        "Weil lastabhängige Spannungsanteile wegfallen und Polarisationsprozesse relaxieren.",
+        "Weil die Zellzahl während der Messung zunimmt.",
+        "Weil die Abtastrate auf 1 Hz wechselt."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Nach der Stromabschaltung fällt die Belastung weg und die Spannung relaxiert.",
+      "feedback_incorrect": "Die Spannungsänderung ist eine physikalische Reaktion auf das Entfernen der Last und die anschließende Relaxation.",
+      "explanation": "Die Spannungserholung nach Lastabschaltung ist ein zentrales Merkmal der Spannungsrelaxation.",
+      "source_ids": [
+        "fernando_relaxation_2024",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_quiz_03",
+      "knowledge_type": "conceptual",
+      "question": "Kann der erste Spannungswert direkt nach der Stromabschaltung automatisch als Gleichgewichts-OCV bezeichnet werden?",
+      "options": [
+        "Ja, sobald der Strom abgeschaltet wurde.",
+        "Nein, weil sich die Spannung während der Ruhephase noch zeitabhängig verändern kann.",
+        "Ja, aber nur bei 25 °C.",
+        "Ja, wenn mindestens zwölf Zellen vorhanden sind."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Stromabschaltung und elektrochemisches Gleichgewicht sind nicht dasselbe.",
+      "feedback_incorrect": "Beobachte die Relaxationskurve: Auch nach der Stromabschaltung ändert sich die Spannung weiter.",
+      "explanation": "Die für eine OCV-Bestimmung notwendige Relaxationszeit kann von den Betriebsbedingungen abhängen.",
+      "source_ids": [
+        "pakjoo_2026",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_quiz_04",
+      "knowledge_type": "procedural",
+      "question": "Warum werden die Ereignisse in dieser Auswertung anhand ihrer Zeitstempel und nicht anhand der Anzahl der Messpunkte bewertet?",
+      "options": [
+        "Weil alle Signale nur einen Messpunkt besitzen.",
+        "Weil innerhalb der Messung unterschiedliche Abtastraten auftreten.",
+        "Weil Zeitstempel nur für die Temperatur benötigt werden.",
+        "Weil die Spannung nicht numerisch gespeichert wird."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Bei unterschiedlichen Abtastraten ist die Anzahl der Samples kein zuverlässiges Maß für die physikalische Dauer.",
+      "feedback_incorrect": "Eine 100-Hz-Phase enthält pro Sekunde deutlich mehr Messpunkte als eine 1-Hz-Phase.",
+      "explanation": "Die physikalische Ereignisdauer wird aus Start- und Endzeitpunkt berechnet.",
+      "source_ids": []
+    },
+    {
+      "id": "ocv_quiz_05",
+      "knowledge_type": "procedural",
+      "question": "Warum werden Spannungen nach 1, 10, 30 und 60 Minuten Relaxation betrachtet?",
+      "options": [
+        "Weil jede Relaxationsphase genau 60 Minuten dauert.",
+        "Damit Messungen mit unterschiedlicher gesamter Relaxationsdauer bei gleichen Zeitpunkten verglichen werden können.",
+        "Damit die Temperatur immer 25 °C beträgt.",
+        "Weil 60 Minuten definitionsgemäß immer Gleichgewichts-OCV bedeuten."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Gemeinsame Zeitpunkte machen die Relaxationsmessungen zeitlich besser vergleichbar.",
+      "feedback_incorrect": "Die fünf Tests besitzen unterschiedlich lange Relaxationsphasen.",
+      "explanation": "Die gewählten Zeitpunkte sind Vergleichspunkte. Sie stellen keine allgemeine Definition für Gleichgewichts-OCV dar.",
+      "source_ids": [
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_quiz_06",
+      "knowledge_type": "conceptual",
+      "question": "Im Versuch bei 25 °C wurden 138.48 Ah entnommen und eine gesamte Spannungserholung von 0.477 V beobachtet. Welche Aussage ist wissenschaftlich am sinnvollsten?",
+      "options": [
+        "Beide Werte werden vollständig und ausschließlich durch die Temperatur bestimmt.",
+        "Die Werte beschreiben diesen Versuch unter seinen konkreten Messbedingungen.",
+        "Die Spannungserholung entspricht direkt der Batteriekapazität.",
+        "Aus der Spannungserholung kann die Zellzahl berechnet werden."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Die Ergebnisse beschreiben zunächst das beobachtete Verhalten unter den konkreten Versuchsbedingungen.",
+      "feedback_incorrect": "Bei der Interpretation müssen neben der Temperatur auch Batteriezustand und vorherige Belastung berücksichtigt werden.",
+      "explanation": "Messbeobachtung und kausale Erklärung sollten voneinander getrennt werden.",
+      "source_ids": [
+        "fernando_dataset_2024",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_quiz_07",
+      "knowledge_type": "procedural",
+      "question": "Dieser Versuch liefert etwa 138.48 Ah und 6.11 kWh. Wie wurden diese Größen in Python bestimmt?",
+      "options": [
+        "Aus der Anzahl der Messpunkte.",
+        "Kapazität aus der Integration des Stroms und Energie aus der Integration von Spannung mal Strom über die Zeit.",
+        "Nur aus der Endspannung.",
+        "Aus der Anzahl der Zellen."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Beide Größen werden aus den Rohsignalen und den tatsächlichen Zeitstempeln berechnet.",
+      "feedback_incorrect": "Kapazität und Energie werden nicht aus der Samplezahl oder der Zellzahl bestimmt.",
+      "explanation": "Q = -1/3600 · ∫I(t)dt und E = -1/3600 · ∫U(t)I(t)dt.",
+      "source_ids": []
+    },
+    {
+      "id": "ocv_quiz_08",
+      "knowledge_type": "procedural",
+      "question": "Warum werden die in Python berechneten Kapazitäts- und Energiewerte mit den Prüfstandswerten verglichen?",
+      "options": [
+        "Damit der Prüfstand die Python-Ergebnisse ersetzt.",
+        "Zur Plausibilisierung der Python-basierten Datenverarbeitung und Integration.",
+        "Damit keine Rohdaten mehr benötigt werden.",
+        "Um die OCV direkt aus der Kapazität zu berechnen."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Die Prüfstandswerte werden als Referenz für die Plausibilisierung verwendet.",
+      "feedback_incorrect": "Die eigentlichen KPIs werden weiterhin in Python aus den Messsignalen berechnet.",
+      "explanation": "Für diesen Test beträgt die Abweichung ungefähr 0.0010 % bei der Kapazität und 0.0009 % bei der Energie.",
+      "source_ids": []
+    },
+    {
+      "id": "ocv_quiz_09",
+      "knowledge_type": "conceptual",
+      "question": "Das aktuelle Modul enthält 12 erkannte Zellen. Was beschreibt die Zellspannungsdifferenz?",
+      "options": [
+        "Die Differenz zwischen höchster und niedrigster Zellspannung zu einem Zeitpunkt.",
+        "Die Differenz zwischen Modulspannung und Strom.",
+        "Die Änderung der Klimatemperatur.",
+        "Die Anzahl der Zellen, die bereits relaxiert sind."
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. Der Zellspread zeigt die momentane Streuung der Einzelzellspannungen.",
+      "feedback_incorrect": "Verglichen werden die höchste und niedrigste Zellspannung innerhalb des Moduls.",
+      "explanation": "Bei einer Einzelzelle wäre dieser Vergleich nicht sinnvoll.",
+      "source_ids": []
+    }
+  ],
+  "reflections": [
+    {
+      "id": "ocv_reflection_01",
+      "knowledge_type": "conceptual",
+      "prompt": "Warum sollte die Spannung direkt nach dem Abschalten des Entladestroms nicht automatisch als vollständig eingestellte OCV bezeichnet werden?",
+      "minimum_input_characters": 20,
+      "model_answer": "Nach der Stromabschaltung verändert sich die Klemmenspannung während der Relaxation weiter. Ein stromloser Zustand bedeutet deshalb nicht automatisch, dass bereits ein elektrochemischer Gleichgewichtszustand erreicht wurde.",
+      "source_ids": [
+        "pakjoo_2026",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_reflection_02",
+      "knowledge_type": "conceptual",
+      "prompt": "Bei 25 °C wurde in diesem Versuch eine gesamte Spannungserholung von 0.477 V gemessen. Welche zusätzlichen Informationen wären wichtig, bevor du die Höhe dieser Erholung ausschließlich mit der Temperatur erklärst?",
+      "minimum_input_characters": 30,
+      "model_answer": "Zusätzlich sollten unter anderem der Entladezustand am Ende der Belastung, die zuvor entnommene Ladungsmenge, die Belastungshistorie, die Relaxationsdauer und die tatsächlichen Zelltemperaturen berücksichtigt werden.",
+      "source_ids": [
+        "fernando_dataset_2024",
+        "jorkesh_2026"
+      ]
+    }
+  ],
+  "transfer_tasks": [
+    {
+      "id": "ocv_transfer_01",
+      "knowledge_type": "transfer",
+      "scenario": "Ein neuer OCV-/Relaxationstest besitzt nur eine 40-minütige Relaxationsphase.",
+      "question": "Welche der bisherigen Vergleichspunkte können ohne Extrapolation verwendet werden?",
+      "options": [
+        "1, 10 und 30 Minuten",
+        "nur 60 Minuten",
+        "nur die Endspannung",
+        "keiner der Zeitpunkte"
+      ],
+      "correct_option": 0,
+      "explanation": "Es sollten nur Zeitpunkte verwendet werden, die tatsächlich innerhalb der aufgezeichneten Relaxationsphase liegen.",
+      "source_ids": [
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_transfer_02",
+      "knowledge_type": "transfer",
+      "scenario": "Die aktuelle Analyse erkennt 12 Zellkanäle. Ein zukünftiger Datensatz enthält nur eine einzelne Zelle.",
+      "question": "Welche Kennzahl ist bei nur einer Zelle nicht sinnvoll?",
+      "options": [
+        "Entladekapazität",
+        "Entladeenergie",
+        "Zellspannungsdifferenz zwischen Zellen",
+        "Relaxationsspannung"
+      ],
+      "correct_option": 2,
+      "explanation": "Bei nur einer Zelle existiert kein Vergleich zwischen höchster und niedrigster Zellspannung. Die anderen Größen können weiterhin bestimmt werden.",
+      "source_ids": []
+    }
+  ],
+  "internal_sources": {
+    "camil_2021": {
+      "authors": "Makransky, G.; Petersen, G. B.",
+      "year": 2021,
+      "title": "The Cognitive Affective Model of Immersive Learning (CAMIL)",
+      "doi": "10.1007/s10648-020-09586-2"
+    },
+    "weng_2014": {
+      "authors": "Weng, C.; Sun, J.; Peng, H.",
+      "year": 2014,
+      "title": "A unified open-circuit-voltage model of lithium-ion batteries for state-of-charge estimation and state-of-health monitoring",
+      "doi": "10.1016/j.jpowsour.2014.02.026"
+    },
+    "fernando_relaxation_2024": {
+      "authors": "Fernando, A.; Kuipers, M.; Angenendt, G.; Kairies, K.-P.; Dubarry, M.",
+      "year": 2024,
+      "title": "Voltage relaxation characterization methods in lithium-ion batteries",
+      "doi": "10.1016/j.meaene.2024.100013"
+    },
+    "fernando_dataset_2024": {
+      "authors": "Fernando, A. et al.",
+      "year": 2024,
+      "title": "Benchmark dataset for the study of the relaxation of commercial NMC-811 and LFP cells",
+      "doi": "10.1016/j.xcrp.2023.101754"
+    },
+    "jorkesh_2026": {
+      "authors": "Jorkesh, S.; Akbari, A.; Ahmed, R.; Habibi, S.",
+      "year": 2026,
+      "title": "SOC-dependent voltage relaxation and dual time-constant behavior in lithium-ion batteries: A time-domain analysis",
+      "doi": "10.1016/j.jpowsour.2026.240338"
+    },
+    "pakjoo_2026": {
+      "authors": "Pakjoo, M.; Piegari, L.",
+      "year": 2026,
+      "title": "Experimental Comparison of Different Techniques for Estimating Li-Ion Open-Circuit Voltage",
+      "doi": "10.3390/batteries12010032"
+    },
+    "nguyen_2026": {
+      "authors": "Nguyen, N.; Balasingam, B.",
+      "year": 2026,
+      "title": "Lithium-Ion Battery Open-Circuit Voltage Analysis for Extreme Temperature Applications",
+      "doi": "10.3390/en19010027"
+    }
+  }
+}

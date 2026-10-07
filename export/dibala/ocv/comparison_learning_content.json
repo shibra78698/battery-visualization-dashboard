@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "language": "de",
+  "topic": "ocv_temperature_comparison",
+  "scope": "comparison",
+  "display_references": false,
+  "graph_explanations": [
+    {
+      "id": "capacity_temperature",
+      "title": "Entnommene Ladung und Temperatur",
+      "what": "Die Grafik vergleicht die während der Hauptentladung entnommene Ladungsmenge für die verschiedenen Prüftemperaturen.",
+      "focus": "Achte darauf, wie stark sich die entnommene Ladung zwischen den Versuchen unterscheidet.",
+      "interpretation": "Die Werte beschreiben die nutzbare Entladung unter den jeweiligen Versuchsbedingungen. Sie werden nicht automatisch mit einer temperaturabhängigen Änderung der Nennkapazität gleichgesetzt.",
+      "hover_help": "Beim Überfahren sollen Temperatur, Kapazität und Entladedauer angezeigt werden.",
+      "source_ids": [
+        "nguyen_2026"
+      ]
+    },
+    {
+      "id": "energy_temperature",
+      "title": "Entnommene Energie und Temperatur",
+      "what": "Die Grafik zeigt die während der Hauptentladung abgegebene Energie für die verschiedenen Temperaturbedingungen.",
+      "focus": "Vergleiche den Energieverlauf mit dem Verlauf der entnommenen Ladungsmenge.",
+      "interpretation": "Die Energie hängt sowohl von der entnommenen Ladung als auch vom Spannungsniveau während der Entladung ab.",
+      "hover_help": "Beim Überfahren sollen Temperatur und Energie angezeigt werden.",
+      "source_ids": []
+    },
+    {
+      "id": "recovery_temperature",
+      "title": "Spannungserholung und Temperatur",
+      "what": "Die Grafik vergleicht die gesamte gemessene Spannungserholung nach der Hauptentladung.",
+      "focus": "Achte darauf, bei welchen Temperaturen eine stärkere Spannungserholung beobachtet wird.",
+      "interpretation": "Ein Temperaturtrend kann beobachtet werden. Für eine kausale Interpretation müssen jedoch auch Entladezustand und Belastungshistorie berücksichtigt werden.",
+      "hover_help": "Beim Überfahren sollen Temperatur und gesamte Spannungserholung angezeigt werden.",
+      "source_ids": [
+        "fernando_dataset_2024",
+        "jorkesh_2026",
+        "nguyen_2026"
+      ]
+    },
+    {
+      "id": "relaxation_60min_temperature",
+      "title": "Relaxationsspannung nach 60 Minuten",
+      "what": "Die Grafik vergleicht die Modulspannung nach exakt 60 Minuten Relaxationszeit.",
+      "focus": "Alle Werte beziehen sich auf denselben zeitlichen Abstand zur Stromabschaltung.",
+      "interpretation": "Der gleiche Zeitpunkt verbessert die zeitliche Vergleichbarkeit. Die absoluten Spannungen können dennoch unterschiedliche Batteriezustände widerspiegeln.",
+      "hover_help": "Beim Überfahren sollen Temperatur und Spannung nach 60 Minuten angezeigt werden.",
+      "source_ids": [
+        "jorkesh_2026"
+      ]
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "ocv_comparison_quiz_01",
+      "knowledge_type": "conceptual",
+      "question": "Die größte entnommene Ladungsmenge dieser Messreihe beträgt 144.27 Ah bei 40 °C. Welche Aussage ist zulässig?",
+      "options": [
+        "Diese Temperatur erhöht allgemeingültig die Nennkapazität jeder Batterie auf diesen Wert.",
+        "Unter den vorliegenden Versuchsbedingungen wurde bei dieser Temperatur die größte entnommene Ladungsmenge beobachtet.",
+        "Die anderen Messungen sind deshalb fehlerhaft.",
+        "Die Kapazität ist unabhängig vom Entladeverhalten."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Das Ergebnis ist zunächst eine Beobachtung innerhalb dieser Messreihe.",
+      "feedback_incorrect": "Aus einer Messreihe sollte keine allgemeingültige Kausalregel für jede Batterie abgeleitet werden.",
+      "explanation": "Bei niedrigen Temperaturen können unter anderem stärkere Polarisation und frühere Spannungsgrenzen das nutzbare Entladeverhalten beeinflussen.",
+      "source_ids": [
+        "nguyen_2026"
+      ]
+    },
+    {
+      "id": "ocv_comparison_quiz_02",
+      "knowledge_type": "conceptual",
+      "question": "Die stärkste gemessene Spannungserholung beträgt 1.578 V bei -5 °C. Welche Interpretation ist am sinnvollsten?",
+      "options": [
+        "Die Temperatur ist sicher die einzige Ursache.",
+        "Die Messreihe zeigt dort die stärkste Erholung, aber weitere Einflussgrößen müssen berücksichtigt werden.",
+        "Die Batterie wurde während der Relaxation aktiv geladen.",
+        "Der Wert entspricht direkt dem SOC."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Beobachtung und kausale Erklärung müssen getrennt werden.",
+      "feedback_incorrect": "Relaxation kann neben der Temperatur auch vom Entladezustand und der Belastungshistorie abhängen.",
+      "explanation": "Temperatur ist ein wichtiger Einflussfaktor, aber nicht die einzige relevante Größe.",
+      "source_ids": [
+        "fernando_dataset_2024",
+        "jorkesh_2026"
+      ]
+    },
+    {
+      "id": "ocv_comparison_quiz_03",
+      "knowledge_type": "conceptual",
+      "question": "Warum kann die Spannungsrelaxation bei niedriger Temperatur stärker ausgeprägt sein?",
+      "options": [
+        "Weil niedrige Temperatur grundsätzlich elektrische Energie erzeugt.",
+        "Stärkere Polarisation unter Belastung kann zu einer größeren Spannungserholung nach Stromabschaltung beitragen.",
+        "Weil bei niedriger Temperatur immer mehr Zellen vorhanden sind.",
+        "Weil das Messgerät die Spannung automatisch erhöht."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Eine stärkere Polarisation ist eine plausible Erklärung für eine größere Spannungserholung.",
+      "feedback_incorrect": "Betrachte den Unterschied zwischen belasteter Klemmenspannung und Spannung nach Lastabschaltung.",
+      "explanation": "Die Aussage ist keine allgemeingültige Temperaturregel. Auch Entladezustand, Rate und Vorgeschichte können das Relaxationsverhalten beeinflussen.",
+      "source_ids": [
+        "nguyen_2026",
+        "fernando_dataset_2024",
+        "jorkesh_2026"
+      ]
+    }
+  ],
+  "reflections": [
+    {
+      "id": "ocv_comparison_reflection_01",
+      "knowledge_type": "conceptual",
+      "prompt": "Wie beeinflusst die Temperatur in der vorliegenden Messreihe die entnehmbare Ladungsmenge und das Entladeverhalten? Beschreibe zuerst nur die beobachteten Daten und trenne sie anschließend von einer möglichen physikalischen Erklärung.",
+      "minimum_input_characters": 40,
+      "model_answer": "Die Messungen zeigen unterschiedliche entnehmbare Ladungsmengen und Entladedauern bei verschiedenen Temperaturen. Besonders ab 0 °C nimmt die entnommene Ladungsmenge in der vorliegenden Messreihe mit steigender Temperatur zu. Eine mögliche Erklärung sind stärkere Polarisationseffekte und früher erreichte Spannungsgrenzen bei niedrigen Temperaturen. Die Beobachtung darf jedoch nicht automatisch als alleiniger Temperatureffekt interpretiert werden.",
+      "source_ids": [
+        "nguyen_2026"
+      ]
+    },
+    {
+      "id": "ocv_comparison_reflection_02",
+      "knowledge_type": "conceptual",
+      "prompt": "Warum reicht der Vergleich der Endspannung der Relaxationsphasen allein nicht aus, um die fünf Temperaturmessungen fair miteinander zu vergleichen?",
+      "minimum_input_characters": 30,
+      "model_answer": "Die aufgezeichneten Relaxationsphasen besitzen unterschiedliche Gesamtdauern. Dadurch wurden die Endspannungen nach unterschiedlich langen Ruhezeiten gemessen. Gemeinsame Zeitpunkte wie 10, 30 oder 60 Minuten sind deshalb für einen zeitlich vergleichbareren Vergleich geeigneter.",
+      "source_ids": [
+        "jorkesh_2026"
+      ]
+    }
+  ],
+  "transfer_tasks": [
+    {
+      "id": "ocv_comparison_transfer_01",
+      "knowledge_type": "transfer",
+      "scenario": "Eine neue Messung wird bei 15 °C durchgeführt. Die Relaxationsphase dauert nur 40 Minuten.",
+      "question": "Wie sollte diese Messung in den bestehenden Temperaturvergleich integriert werden?",
+      "options": [
+        "1-, 10- und 30-Minuten-Werte können verwendet werden; der 60-Minuten-Wert bleibt für diesen Test nicht verfügbar.",
+        "Der 60-Minuten-Wert wird aus den ersten 40 Minuten extrapoliert.",
+        "Nur die letzte Spannung wird als OCV verwendet.",
+        "Die Messung kann überhaupt nicht ausgewertet werden."
+      ],
+      "correct_option": 0,
+      "explanation": "Die Analyse sollte fehlende Zeitpunkte nicht künstlich extrapolieren. Verfügbare gemeinsame Zeitpunkte können weiterhin verglichen werden.",
+      "source_ids": [
+        "jorkesh_2026"
+      ]
+    }
+  ],
+  "internal_sources": {
+    "camil_2021": {
+      "authors": "Makransky, G.; Petersen, G. B.",
+      "year": 2021,
+      "title": "The Cognitive Affective Model of Immersive Learning (CAMIL)",
+      "doi": "10.1007/s10648-020-09586-2"
+    },
+    "weng_2014": {
+      "authors": "Weng, C.; Sun, J.; Peng, H.",
+      "year": 2014,
+      "title": "A unified open-circuit-voltage model of lithium-ion batteries for state-of-charge estimation and state-of-health monitoring",
+      "doi": "10.1016/j.jpowsour.2014.02.026"
+    },
+    "fernando_relaxation_2024": {
+      "authors": "Fernando, A.; Kuipers, M.; Angenendt, G.; Kairies, K.-P.; Dubarry, M.",
+      "year": 2024,
+      "title": "Voltage relaxation characterization methods in lithium-ion batteries",
+      "doi": "10.1016/j.meaene.2024.100013"
+    },
+    "fernando_dataset_2024": {
+      "authors": "Fernando, A. et al.",
+      "year": 2024,
+      "title": "Benchmark dataset for the study of the relaxation of commercial NMC-811 and LFP cells",
+      "doi": "10.1016/j.xcrp.2023.101754"
+    },
+    "jorkesh_2026": {
+      "authors": "Jorkesh, S.; Akbari, A.; Ahmed, R.; Habibi, S.",
+      "year": 2026,
+      "title": "SOC-dependent voltage relaxation and dual time-constant behavior in lithium-ion batteries: A time-domain analysis",
+      "doi": "10.1016/j.jpowsour.2026.240338"
+    },
+    "pakjoo_2026": {
+      "authors": "Pakjoo, M.; Piegari, L.",
+      "year": 2026,
+      "title": "Experimental Comparison of Different Techniques for Estimating Li-Ion Open-Circuit Voltage",
+      "doi": "10.3390/batteries12010032"
+    },
+    "nguyen_2026": {
+      "authors": "Nguyen, N.; Balasingam, B.",
+      "year": 2026,
+      "title": "Lithium-Ion Battery Open-Circuit Voltage Analysis for Extreme Temperature Applications",
+      "doi": "10.3390/en19010027"
+    }
+  }
+}

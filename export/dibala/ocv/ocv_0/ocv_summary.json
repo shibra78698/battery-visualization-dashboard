@@ -1,0 +1,182 @@
+{
+  "test_type": "ocv",
+  "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_OCV_0.mf4",
+  "module": {
+    "number_of_cells": 12,
+    "system_type": "module"
+  },
+  "test_condition": {
+    "temperature_C": 9.346333996013719e-05
+  },
+  "discharge": {
+    "duration_h": 7.6754583333333395,
+    "mean_current_A": -15.609342979703177,
+    "capacity_Ah": 119.80886164831111,
+    "energy_Wh": 5218.506487652657,
+    "start_voltage_V": 48.01618576049805,
+    "end_voltage_V": 39.599857330322266,
+    "minimum_voltage_V": 39.59962844848633,
+    "maximum_voltage_V": 48.01618576049805
+  },
+  "relaxation": {
+    "duration_h": 1.220566014999996,
+    "load_end_voltage_V": 39.599857330322266,
+    "start_voltage_V": 39.78218078613281,
+    "end_voltage_V": 40.991249084472656,
+    "immediate_recovery_V": 0.18232345581054688,
+    "slow_relaxation_V": 1.2090682983398438,
+    "total_recovery_V": 1.3913917541503906,
+    "maximum_absolute_current_A": 0.23822784423828125,
+    "final_10min_slope_mV_per_min": 0.9007556504958398,
+    "voltage_after_1min_V": 40.46216119438175,
+    "recovery_after_1min_V": 0.8623038640594842,
+    "voltage_after_10min_V": 40.81619949115753,
+    "recovery_after_10min_V": 1.2163421608352678,
+    "voltage_after_30min_V": 40.927686491050714,
+    "recovery_after_30min_V": 1.3278291607284487,
+    "voltage_after_60min_V": 40.97878907054901,
+    "recovery_after_60min_V": 1.3789317402267471
+  },
+  "cells": {
+    "number_of_cells": 12,
+    "lowest_cell": "cell_07_V",
+    "lowest_cell_voltage_V": 3.2907795906066895,
+    "maximum_spread_discharge_mV": 21.242141723632812,
+    "mean_spread_discharge_mV": 3.7778759964417015,
+    "spread_relaxation_start_mV": 20.62511444091797,
+    "spread_relaxation_60min_mV": 3.7125190801652885,
+    "spread_relaxation_end_mV": 2.7840137481689453
+  },
+  "temperature": {
+    "test_temperature_C": 9.346333996013719e-05,
+    "climate_temperature_std_C": 0.0678657138866732,
+    "mean_battery_temperature_discharge_C": 1.678071315070106,
+    "maximum_battery_temperature_discharge_C": 2.9160614013671875,
+    "mean_battery_temperature_relaxation_C": 2.2642829508849194,
+    "battery_temperature_end_relaxation_C": 1.7848052978515625
+  },
+  "validation": {
+    "phase_detection": {
+      "time_gap_to_relaxation_s": 0.010000000009313226,
+      "non_rest_events_after_relaxation": 0,
+      "maximum_absolute_relaxation_current_A": 0.23822784423828125
+    },
+    "tester_comparison": {
+      "tester_discharge_quantity_raw": -431316.28125,
+      "tester_discharge_energy_raw": -18786850.0,
+      "tester_discharge_capacity_Ah": 119.810078125,
+      "tester_discharge_energy_Wh": 5218.569444444444,
+      "python_discharge_capacity_Ah": 119.80886164831111,
+      "python_discharge_energy_Wh": 5218.506487652657,
+      "capacity_difference_Ah": -0.0012164766888957956,
+      "energy_difference_Wh": -0.06295679178765567,
+      "capacity_error_pct": 0.0010153375308099072,
+      "energy_error_pct": 0.0012063994253190952
+    }
+  },
+  "test_id": "ocv_0",
+  "kpi_explanations": {
+    "test_temperature_C": {
+      "title": "Prüftemperatur",
+      "value": 9.346333996013719e-05,
+      "unit": "°C",
+      "short": "Mittlere Klimatemperatur während des Versuchs.",
+      "interpretation": "Sie beschreibt die thermische Versuchsbedingung und dient als Grundlage für den Vergleich verschiedener Messungen."
+    },
+    "discharge_duration_h": {
+      "title": "Entladedauer",
+      "value": 7.6754583333333395,
+      "unit": "h",
+      "short": "Dauer der automatisch erkannten Hauptentladung.",
+      "interpretation": "Bei ähnlichem Entladestrom kann eine unterschiedliche Entladedauer auf unterschiedlich lange nutzbare Entladung bis zum Messende hinweisen."
+    },
+    "discharge_capacity_Ah": {
+      "title": "Entnommene Ladung",
+      "value": 119.80886164831111,
+      "unit": "Ah",
+      "short": "Während der Hauptentladung entnommene Ladungsmenge.",
+      "formula": "Q = -1/3600 · ∫ I(t) dt",
+      "interpretation": "Der Wert beschreibt die unter den jeweiligen Versuchsbedingungen entnommene Ladung. Er sollte nicht ohne weitere Informationen direkt mit der Nennkapazität gleichgesetzt werden."
+    },
+    "discharge_energy_Wh": {
+      "title": "Entnommene Energie",
+      "value": 5218.506487652657,
+      "unit": "Wh",
+      "short": "Während der Hauptentladung abgegebene elektrische Energie.",
+      "formula": "E = -1/3600 · ∫ U(t) · I(t) dt",
+      "interpretation": "Die Energie berücksichtigt neben der entnommenen Ladung auch das Spannungsniveau während der Entladung."
+    },
+    "total_recovery_V": {
+      "title": "Gesamte Spannungserholung",
+      "value": 1.3913917541503906,
+      "unit": "V",
+      "short": "Spannungsanstieg vom letzten Lastpunkt bis zum Ende der aufgezeichneten Relaxation.",
+      "formula": "ΔV_total = V_relax,end - V_load,end",
+      "interpretation": "Ein größerer Wert bedeutet eine stärkere beobachtete Spannungserholung. Daraus allein kann jedoch keine eindeutige Ursache abgeleitet werden."
+    },
+    "immediate_recovery_V": {
+      "title": "Sofortige Spannungserholung",
+      "value": 0.18232345581054688,
+      "unit": "V",
+      "short": "Spannungsänderung zwischen dem letzten Lastpunkt und dem ersten Messpunkt der Ruhephase.",
+      "formula": "ΔV_immediate = V_relax,start - V_load,end",
+      "interpretation": "Der Wert beschreibt den sehr frühen Anteil der beobachteten Spannungserholung."
+    },
+    "slow_relaxation_V": {
+      "title": "Weitere Spannungsrelaxation",
+      "value": 1.2090682983398438,
+      "unit": "V",
+      "short": "Weitere Spannungsänderung während der aufgezeichneten Ruhephase.",
+      "formula": "ΔV_slow = V_relax,end - V_relax,start",
+      "interpretation": "Sie zeigt, wie stark sich die Spannung nach dem ersten Ruhepunkt noch weiter verändert."
+    },
+    "relaxation_60min_V": {
+      "title": "Spannung nach 60 Minuten",
+      "value": 40.97878907054901,
+      "unit": "V",
+      "short": "Modulspannung 60 Minuten nach Beginn der Relaxationsphase.",
+      "interpretation": "Dieser gemeinsame Zeitpunkt ermöglicht einen zeitlich vergleichbareren Vergleich zwischen Messungen mit unterschiedlich langen Relaxationsphasen."
+    },
+    "final_10min_slope": {
+      "title": "Spannungsgradient am Ende",
+      "value": 0.9007556504958398,
+      "unit": "mV/min",
+      "short": "Mittlere Änderung der Spannung während der letzten zehn Minuten der Relaxation.",
+      "interpretation": "Ein kleiner Betrag deutet auf einen flacheren Spannungsverlauf hin. Er wird hier nicht als festes Kriterium für Gleichgewichts-OCV verwendet."
+    },
+    "lowest_cell_voltage_V": {
+      "title": "Niedrigste Zellspannung",
+      "value": 3.2907795906066895,
+      "unit": "V",
+      "short": "Niedrigster gemessener Zellspannungswert während der Hauptentladung.",
+      "interpretation": "Die Kennzahl hilft, auffällige Einzelzellen während der Entladung zu erkennen."
+    },
+    "maximum_cell_spread_discharge_mV": {
+      "title": "Maximale Zellspannungsdifferenz",
+      "value": 21.242141723632812,
+      "unit": "mV",
+      "short": "Größte Differenz zwischen der höchsten und niedrigsten Zellspannung während der Entladung.",
+      "formula": "ΔV_cell = V_max - V_min",
+      "interpretation": "Die Kennzahl beschreibt, wie weit die Einzelzellspannungen innerhalb des Moduls zeitweise auseinanderliegen."
+    },
+    "cell_spread_relaxation_60min_mV": {
+      "title": "Zellspannungsdifferenz nach 60 Minuten",
+      "value": 3.7125190801652885,
+      "unit": "mV",
+      "short": "Differenz zwischen höchster und niedrigster Zellspannung nach 60 Minuten Relaxation.",
+      "interpretation": "Der Vergleich mit dem Spread unter Last zeigt, wie sich die Zellspannungsunterschiede im Ruhezustand entwickeln."
+    }
+  },
+  "interface": {
+    "learning_content_file": "learning_content.json",
+    "manifest_file": "manifest.json",
+    "data_files": {
+      "electrical": "electrical.csv",
+      "discharge": "discharge.csv",
+      "relaxation": "relaxation.csv",
+      "cells": "cells.csv",
+      "temperature": "temperature.csv",
+      "phases": "phases.csv"
+    }
+  }
+}
