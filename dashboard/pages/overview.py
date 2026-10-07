@@ -1,253 +1,302 @@
 import streamlit as st
 
-#from data_loader import load_capacity_data
-#from dashboard.data_loader import (load_capacity_data,select_capacity_test,)
-from data_loader import (load_capacity_data,select_capacity_test,)
+from data_loader import (
+    get_dashboard_status,
+    get_system_description,
+)
 
-def format_number(value, decimals=2):
+
+def format_temperature(value):
     if value is None:
         return "–"
 
-    text = f"{value:,.{decimals}f}"
-    return text.replace(",", "X").replace(".", ",").replace("X", ".")
+    value = float(value)
+    rounded = round(value)
+
+    if abs(value - rounded) < 0.05:
+        return f"{rounded:.0f} °C"
+
+    return f"{value:.1f} °C"
 
 
-def get_system_name(number_of_cells):
-    if number_of_cells == 1:
-        return "Einzelzelle"
+status = get_dashboard_status()
 
-    if number_of_cells > 1:
-        return f"{number_of_cells} Zellen Batteriemodul"
-
-    return "Batteriesystem"
-
-
-selected_test = select_capacity_test()
-
-data = load_capacity_data(
-    selected_test
+system_description = (
+    get_system_description()
 )
-
-summary = data["summary"]
-
-number_of_cells = summary.get("module", {}).get("number_of_cells", 0)
-system_name = get_system_name(number_of_cells)
-
-discharge_capacity = summary["capacity"]["discharge_Ah"]
-discharge_energy_kwh = summary["energy"]["discharge_Wh"] / 1000
-energy_efficiency = summary["energy"]["efficiency_pct"]
-max_temperature = summary["temperature"]["maximum_C"]
 
 
 st.markdown(
     f"""
-    <div class="dashboard-header">
-        <h1>Interaktive Batterie Datenanalyse</h1>
+    <div class="dashboard-hero">
+        <h1>
+            Interaktive Batterie Datenanalyse
+        </h1>
         <p>
-            Analyse und didaktische Aufbereitung realer Messdaten:
-            {system_name}
+            Analyse und didaktische Aufbereitung
+            realer Messdaten:
+            {system_description}
         </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-source_file = summary.get(
-    "source_file"
-)
 
-if source_file:
-    st.caption(
-        f"Aktuelle Messdatei: {source_file}"
-    )
-    
-st.subheader("Überblick")
+st.header(
+    "Überblick"
+)
 
 st.write(
-    """
-    Die Anwendung verbindet die Auswertung realer Batteriemessdaten
-    mit interaktiven Visualisierungen und didaktischen Elementen.
-    Die analytischen Berechnungen werden vollständig im Python-Backend
-    durchgeführt. Das Dashboard greift auf die bereits berechneten und
-    exportierten Ergebnisse zu.
-    """
+    "Die Anwendung verbindet die Auswertung realer "
+    "Batteriemessdaten mit interaktiven Visualisierungen "
+    "und didaktischen Lerninhalten. Die analytischen "
+    "Berechnungen erfolgen vollständig in Python. "
+    "Das Dashboard verwendet anschließend die bereits "
+    "berechneten und exportierten Ergebnisse."
 )
 
 
-col1, col2, col3, col4, col5 = st.columns(5)
-
-with col1:
-    st.metric(
-        "Entladekapazität",
-        f"{format_number(discharge_capacity, 2)} Ah",
-    )
-
-with col2:
-    st.metric(
-        "Entladeenergie",
-        f"{format_number(discharge_energy_kwh, 2)} kWh",
-    )
-
-with col3:
-    st.metric(
-        "Energieeffizienz",
-        f"{format_number(energy_efficiency, 2)} %",
-    )
-
-with col4:
-    if number_of_cells > 1:
-        max_cell_spread = summary["cells"]["maximum_spread_mV"]
-
-        st.metric(
-            "Max. Zellspannungsdifferenz",
-            f"{format_number(max_cell_spread, 2)} mV",
-        )
-
-    elif number_of_cells == 1:
-        min_cell_voltage = summary["cells"]["weakest_cell_voltage_V"]
-
-        st.metric(
-            "Minimale Zellspannung",
-            f"{format_number(min_cell_voltage, 4)} V",
-        )
-
-    else:
-        st.metric(
-            "Zellspannungen",
-            "–",
-        )
-
-with col5:
-    st.metric(
-        "Maximale Temperatur",
-        f"{format_number(max_temperature, 2)} °C",
-    )
+st.header(
+    "Messbereiche"
+)
 
 
-st.divider()
-
-st.subheader("Mess- und Analysebereiche")
-
-capacity_col, ocv_col, discharge_col = st.columns(3)
+capacity_col, ocv_col, discharge_col = (
+    st.columns(3)
+)
 
 
 with capacity_col:
-    with st.container(border=True):
-        st.markdown("### 🔋 Kapazitätstest")
-
-        st.write(
-            """
-            Kapazität, Energie, Wirkungsgrad, elektrisches Verhalten,
-            Zellspannungen und thermisches Verhalten.
-            """
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "### 🔋 Kapazitätstest"
         )
 
-        st.success("Analyse verfügbar")
+        st.write(
+            "Kapazität, Energie, Wirkungsgrad, "
+            "Zellspannungen und thermisches Verhalten."
+        )
+
+        if status[
+            "capacity_available"
+        ]:
+            count = status[
+                "capacity_tests"
+            ]
+
+            if count == 1:
+                st.success(
+                    "1 Messung verfügbar"
+                )
+            else:
+                st.success(
+                    f"{count} Messungen verfügbar"
+                )
+
+        else:
+            st.info(
+                "Noch keine Messung verfügbar."
+            )
+
+        st.page_link(
+            "pages/capacity.py",
+            label="Kapazitätstest öffnen",
+            icon="➡️",
+        )
 
 
 with ocv_col:
-    with st.container(border=True):
-        st.markdown("### 📈 OCV-Verhalten")
-
-        st.write(
-            """
-            Leerlaufspannung, Relaxationsverhalten und Zusammenhang
-            zwischen OCV und Ladezustand.
-            """
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "### 📈 OCV Verhalten"
         )
 
-        st.info("Wird im nächsten Arbeitsschritt ergänzt")
+        st.write(
+            "Temperaturabhängige Entladung, "
+            "Spannungsrelaxation, Zellverhalten "
+            "und Vergleich verschiedener "
+            "Temperaturbedingungen."
+        )
+
+        if status[
+            "ocv_available"
+        ]:
+            count = status[
+                "ocv_tests"
+            ]
+
+            if count == 1:
+                st.success(
+                    "1 Messung verfügbar"
+                )
+            else:
+                st.success(
+                    f"{count} Messungen verfügbar"
+                )
+
+            temperatures = status[
+                "ocv_temperatures"
+            ]
+
+            if temperatures:
+                temperature_text = (
+                    " · ".join(
+                        format_temperature(
+                            value
+                        )
+                        for value
+                        in temperatures
+                    )
+                )
+
+                st.caption(
+                    "Temperaturen: "
+                    + temperature_text
+                )
+
+        else:
+            st.info(
+                "Noch keine OCV Messung verfügbar."
+            )
+
+        st.page_link(
+            "pages/ocv.py",
+            label="OCV Verhalten öffnen",
+            icon="➡️",
+        )
 
 
 with discharge_col:
-    with st.container(border=True):
-        st.markdown("### ⚡ Entladung & EIS")
-
-        st.write(
-            """
-            Dynamisches Entladeverhalten, Spannungsabfall,
-            Innenwiderstand und Impedanzanalyse.
-            """
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "### ⚡ Entladung und EIS"
         )
 
-        st.info("Wird nach der OCV-Analyse ergänzt")
+        st.write(
+            "Dynamisches Entladeverhalten, "
+            "Spannungsverhalten und "
+            "elektrochemische Impedanzanalyse."
+        )
+
+        if status[
+            "discharge_available"
+        ]:
+            count = status[
+                "discharge_tests"
+            ]
+
+            if count == 1:
+                st.success(
+                    "1 Messung verfügbar"
+                )
+            else:
+                st.success(
+                    f"{count} Messungen verfügbar"
+                )
+
+        else:
+            st.info(
+                "Wird in einem späteren "
+                "Arbeitsschritt ergänzt."
+            )
+
+        st.page_link(
+            "pages/discharge.py",
+            label="Entladung und EIS öffnen",
+            icon="➡️",
+        )
 
 
 st.divider()
 
-st.subheader("Aktuelle Messung")
 
-with st.container(border=True):
-    st.write(
-        f"**Untersuchtes System:** {system_name}"
-    )
-
-    st.write(
-        f"**Erkannte Zellspannungssignale:** {number_of_cells}"
-    )
-
-    st.write(
-        "**Aktuell verfügbare Analyse:** Kapazitätstest"
-    )
-
-
-st.divider()
-
-st.subheader("Didaktisches Konzept")
+st.header(
+    "Didaktisches Konzept"
+)
 
 st.write(
-    """
-    Die Lerninhalte sind so aufgebaut, dass neben grundlegenden Fakten
-    auch Zusammenhänge, Auswertungsmethoden und die Übertragung des
-    Wissens auf neue Messsituationen behandelt werden.
-    """
+    "Die Lerninhalte sind so aufgebaut, dass neben "
+    "grundlegenden Fakten auch Zusammenhänge, "
+    "Auswertungsmethoden und die Übertragung des "
+    "Wissens auf neue Messsituationen behandelt werden."
 )
 
 
-d1, d2, d3, d4 = st.columns(4)
+knowledge_1, knowledge_2, knowledge_3, knowledge_4 = (
+    st.columns(4)
+)
 
 
-with d1:
-    with st.container(border=True):
-        st.markdown("**Faktenwissen**")
+with knowledge_1:
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "#### Faktenwissen"
+        )
 
         st.caption(
-            "Definitionen, Formeln, Einheiten und Grundbegriffe"
+            "Definitionen, Formeln, Einheiten "
+            "und Grundbegriffe"
         )
 
 
-with d2:
-    with st.container(border=True):
-        st.markdown("**Konzeptwissen**")
+with knowledge_2:
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "#### Konzeptwissen"
+        )
 
         st.caption(
-            "Zusammenhänge verstehen und begründen"
+            "Zusammenhänge verstehen "
+            "und begründen"
         )
 
 
-with d3:
-    with st.container(border=True):
-        st.markdown("**Prozedurales Wissen**")
+with knowledge_3:
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "#### Prozedurales Wissen"
+        )
 
         st.caption(
-            "Berechnungen und Auswertungsmethoden nachvollziehen"
+            "Berechnungen und "
+            "Auswertungsmethoden nachvollziehen"
         )
 
 
-with d4:
-    with st.container(border=True):
-        st.markdown("**Wissenstransfer**")
+with knowledge_4:
+    with st.container(
+        border=True
+    ):
+        st.markdown(
+            "#### Wissenstransfer"
+        )
 
         st.caption(
-            "Gelerntes auf neue Messsituationen übertragen"
+            "Gelerntes auf neue "
+            "Messsituationen übertragen"
         )
 
 
 st.divider()
 
+
 st.caption(
     "Die Datenanalyse erfolgt vollständig in Python. "
-    "Die Ergebnisse werden über strukturierte CSV- und JSON-Dateien "
-    "für Streamlit und die spätere Integration in DiBaLa bereitgestellt."
+    "Die Ergebnisse werden über strukturierte CSV und "
+    "JSON Dateien für Streamlit und die spätere "
+    "Integration in DiBaLa bereitgestellt."
 )
 
