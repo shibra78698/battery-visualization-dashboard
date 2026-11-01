@@ -1,0 +1,4 @@
+metric,value,unit
+Zeitabstand zwischen Hauptentladung und Relaxation,0.010000000009313226,s
+Spätere Belastungsereignisse nach Relaxation,0.0,
+Maximaler Strombetrag während Relaxation,0.2628326416015625,A

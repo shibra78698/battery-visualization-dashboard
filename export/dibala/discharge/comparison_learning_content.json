@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.0",
+  "language": "de",
+  "topic": "discharge_temperature_comparison",
+  "scope": "comparison",
+  "dashboard_page": "discharge",
+  "eis_separate_page": false,
+  "display_references": false,
+  "graph_explanations": [
+    {
+      "id": "capacity_temperature",
+      "section": "temperature_comparison",
+      "title": "Hauptentladekapazität und Temperatur",
+      "what": "Vergleicht die während der Hauptentladung entnommene Ladung der Temperaturtests.",
+      "focus": "Achte besonders auf Unterschiede zwischen kalten und wärmeren Tests.",
+      "interpretation": "Der Vergleich beschreibt die nutzbare Entladung dieser Messreihe.",
+      "hover_help": "Temperatur, Kapazität und Energie anzeigen.",
+      "source_ids": [
+        "ma_2018",
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "energy_temperature",
+      "section": "temperature_comparison",
+      "title": "Hauptentladeenergie und Temperatur",
+      "what": "Zeigt die abgegebene Hauptentladeenergie für die verschiedenen Temperaturen.",
+      "focus": "Vergleiche Energie mit Kapazität und minimaler Modulspannung.",
+      "interpretation": "Die Energie hängt von Ladungsmenge und Spannungsniveau ab.",
+      "hover_help": "Temperatur, Energie und Kapazität anzeigen.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "minimum_voltage_temperature",
+      "section": "temperature_comparison",
+      "title": "Minimale Modulspannung und Temperatur",
+      "what": "Vergleicht die niedrigste Modulspannung während der Hauptentladung.",
+      "focus": "Achte darauf, ob die Spannung bei niedriger Temperatur stärker absinkt.",
+      "interpretation": "Ein niedrigeres Spannungsniveau kann mit erhöhter Impedanz und Polarisation zusammenhängen.",
+      "hover_help": "Temperatur und minimale Modulspannung anzeigen.",
+      "source_ids": [
+        "ma_2018"
+      ]
+    },
+    {
+      "id": "resistance_temperature",
+      "section": "temperature_comparison",
+      "title": "Pulswiderstand und Temperatur",
+      "what": "Vergleicht die mittleren Pulswiderstände der Temperaturtests.",
+      "focus": "Vergleiche 0,1-, 10- und 18-s-Werte.",
+      "interpretation": "In den vorliegenden Daten steigen die Pulswiderstände bei niedriger Temperatur.",
+      "hover_help": "Temperatur, Pulszeitpunkt und Widerstand anzeigen.",
+      "source_ids": [
+        "stroe_2016",
+        "ma_2018"
+      ]
+    },
+    {
+      "id": "cell_spread_temperature",
+      "section": "temperature_comparison",
+      "title": "Zellspannungsdifferenz und Temperatur",
+      "what": "Vergleicht den maximalen Zellspannungs-Spread der Tests.",
+      "focus": "Achte darauf, bei welchen Temperaturen die Zellspannungen stärker auseinanderliegen.",
+      "interpretation": "Der Vergleich beschreibt eine Messbeobachtung und keine eindeutige Fehlerdiagnose.",
+      "hover_help": "Temperatur und maximalen Zellspread anzeigen.",
+      "source_ids": []
+    },
+    {
+      "id": "eis_temperature_guidance",
+      "section": "eis",
+      "dashboard_page": "discharge",
+      "title": "EIS-Spektren zwischen Temperaturen vergleichen",
+      "what": "Nyquist- und Bode-Kurven verschiedener Temperaturtests werden innerhalb der Entladeseite verglichen.",
+      "focus": "Vergleiche möglichst Spektren bei ähnlichem relativem Entladefortschritt.",
+      "interpretation": "Spektralverschiebungen werden zunächst beschreibend interpretiert.",
+      "hover_help": "Temperatur, Frequenz, Zyklus und Impedanzgrößen anzeigen.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "discharge_comparison_quiz_01",
+      "knowledge_type": "conceptual",
+      "question": "Die kleinste Hauptentladekapazität liegt bei -5 °C und die größte bei 40 °C. Welche Aussage ist zulässig?",
+      "options": [
+        "Die Messreihe zeigt einen Temperaturtrend unter den vorliegenden Bedingungen.",
+        "Jede Batterie hat bei der höheren Temperatur immer exakt diese Kapazität.",
+        "Die kalte Messung ist deshalb ungültig.",
+        "Kapazität ist grundsätzlich temperaturunabhängig."
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. Die Aussage bleibt auf diese Messreihe begrenzt.",
+      "feedback_incorrect": "Aus fünf Tests sollte keine allgemeine Regel für jede Batterie abgeleitet werden.",
+      "explanation": "Niedrige Temperatur kann verfügbare Kapazität reduzieren und Impedanz erhöhen.",
+      "source_ids": [
+        "ma_2018",
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "eis_comparison_quiz_01",
+      "knowledge_type": "conceptual",
+      "question": "Wie sollten EIS Spektren verschiedener Temperaturen möglichst verglichen werden?",
+      "options": [
+        "Bei möglichst ähnlichem Entladefortschritt und dokumentierten Messbedingungen.",
+        "Nur anhand eines zufälligen Frequenzpunkts.",
+        "Unabhängig von Zyklus und Batteriezustand.",
+        "Nur nachdem jedes Spektrum in ein Ersatzschaltbild gezwungen wurde."
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. Entladezustand und Temperatur beeinflussen die Impedanz.",
+      "feedback_incorrect": "Für einen sinnvollen Vergleich sollten die Randbedingungen ähnlich sein.",
+      "explanation": "Der relative Entladefortschritt kann dafür als Vergleichsgröße dienen.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    }
+  ],
+  "reflections": [
+    {
+      "id": "discharge_comparison_reflection_01",
+      "knowledge_type": "conceptual",
+      "prompt": "Beschreibe zuerst die sichtbaren Temperaturtrends für Kapazität, Energie, minimale Spannung und Pulswiderstand. Trenne anschließend Beobachtung und mögliche physikalische Erklärung.",
+      "minimum_input_characters": 50,
+      "model_answer": "In der Messreihe sind bei niedriger Temperatur geringere nutzbare Kapazität und Energie, niedrigere Spannungslagen sowie höhere Pulswiderstände sichtbar.",
+      "source_ids": [
+        "ma_2018",
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "eis_comparison_reflection_01",
+      "knowledge_type": "conceptual",
+      "prompt": "Wenn sich zwei Nyquist- oder Bode-Spektren bei unterschiedlichen Temperaturen unterscheiden: Welche Randbedingungen sollten geprüft werden?",
+      "minimum_input_characters": 40,
+      "model_answer": "Zu prüfen sind unter anderem Entladefortschritt, Frequenzbereich, Anregungsbedingungen, Batterietemperatur, Alterungszustand und Belastungshistorie.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    }
+  ],
+  "transfer_tasks": [
+    {
+      "id": "discharge_comparison_transfer_01",
+      "knowledge_type": "transfer",
+      "scenario": "Eine neue Entladungsmessung bei 15 °C wird zum Datensatz hinzugefügt.",
+      "question": "Wie sollte sie in den Temperaturvergleich aufgenommen werden?",
+      "options": [
+        "Als eigenständiger Test analysieren und als weitere Zeile ergänzen.",
+        "Mit der 10-°C-Datei zusammenfügen.",
+        "Die Temperatur auf 25 °C ändern.",
+        "Nur die EIS-Daten behalten."
+      ],
+      "correct_option": 0,
+      "explanation": "Jede MF4 Datei bleibt ein unabhängiger Test.",
+      "source_ids": []
+    },
+    {
+      "id": "eis_comparison_transfer_01",
+      "knowledge_type": "transfer",
+      "scenario": "Ein neuer EIS-Test besitzt nur sieben vollständige Spektren statt neun.",
+      "question": "Was sollte das Dashboard tun?",
+      "options": [
+        "Die sieben vorhandenen Spektren dynamisch anbieten und fehlende Zyklen nicht erfinden.",
+        "Zwei Spektren durch Kopieren ergänzen.",
+        "Die Datei automatisch verwerfen.",
+        "Die letzten Spektren aus anderen Temperaturen übernehmen."
+      ],
+      "correct_option": 0,
+      "explanation": "Die Schnittstelle soll nur tatsächlich vorhandene Daten darstellen.",
+      "source_ids": []
+    }
+  ],
+  "internal_sources": {
+    "camil_2021": {
+      "authors": "Makransky, G.; Petersen, G. B.",
+      "year": 2021,
+      "title": "The Cognitive Affective Model of Immersive Learning (CAMIL)",
+      "doi": "10.1007/s10648-020-09586-2"
+    },
+    "stroe_2016": {
+      "authors": "Stroe, D.-I.; Swierczynski, M.; Stroe, A.-I.; Kær, S. K.",
+      "year": 2016,
+      "title": "Generalized Characterization Methodology for Performance Modelling of Lithium-Ion Batteries",
+      "doi": "10.3390/batteries2040037"
+    },
+    "ma_2018": {
+      "authors": "Ma, S.; Jiang, M.; Tao, P.; Song, C.; Wu, J.; Wang, J.; Deng, T.; Shang, W.",
+      "year": 2018,
+      "title": "Temperature effect and thermal impact in lithium-ion batteries: A review",
+      "doi": "10.1016/j.pnsc.2018.11.002"
+    },
+    "meddings_2020": {
+      "authors": "Meddings, N. et al.",
+      "year": 2020,
+      "title": "Application of electrochemical impedance spectroscopy to commercial Li-ion cells: A review",
+      "doi": "10.1016/j.jpowsour.2020.228742"
+    },
+    "iurilli_2021": {
+      "authors": "Iurilli, P.; Brivio, C.; Wood, V.",
+      "year": 2021,
+      "title": "On the use of electrochemical impedance spectroscopy to characterize and model the aging phenomena of lithium-ion batteries: a critical review",
+      "doi": "10.1016/j.jpowsour.2021.229860"
+    },
+    "internal_eis_verification": {
+      "authors": "DiBaLa Bachelorarbeit",
+      "year": 2026,
+      "title": "Interne EIS Vorzeichen- und Skalenprüfung mit ACIR Referenzkanälen",
+      "type": "project_validation",
+      "note": "Zre/Zim stimmen bei 10, 100 und 1000 Hz numerisch und im Vorzeichen mit den ACIR Referenzkanälen überein."
+    }
+  }
+}

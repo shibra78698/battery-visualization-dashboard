@@ -1,0 +1,9 @@
+metric,value,unit
+Entladedauer,7.771894444444462,h
+Mittlerer Entladestrom,-15.610069700100137,A
+Entnommene Kapazität,121.31981397640352,Ah
+Entnommene Energie,5296.550957001911,Wh
+Spannung zu Beginn,48.440914154052734,V
+Spannung am Ende,39.600067138671875,V
+Minimale Modulspannung,39.59972381591797,V
+Maximale Modulspannung,48.440914154052734,V

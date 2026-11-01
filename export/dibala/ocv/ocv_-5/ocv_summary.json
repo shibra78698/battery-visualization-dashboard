@@ -176,7 +176,13 @@
       "relaxation": "relaxation.csv",
       "cells": "cells.csv",
       "temperature": "temperature.csv",
-      "phases": "phases.csv"
+      "phases": "phases.csv",
+      "discharge_summary": "discharge_summary.csv",
+      "relaxation_summary": "relaxation_summary.csv",
+      "cell_summary": "cell_summary.csv",
+      "temperature_summary": "temperature_summary.csv",
+      "validation": "validation.csv",
+      "phase_quality": "phase_quality.csv"
     }
   }
 }

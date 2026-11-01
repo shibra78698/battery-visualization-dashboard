@@ -1,0 +1,7 @@
+metric,value,unit
+Prüftemperatur,25.000492568986633,°C
+Standardabweichung Klimatemperatur,0.028379643474907963,°C
+Mittlere Batterietemperatur während Entladung,26.252484091915814,°C
+Maximale Batterietemperatur während Entladung,27.426666259765625,°C
+Mittlere Batterietemperatur während Relaxation,26.93360919183832,°C
+Batterietemperatur am Ende der Relaxation,26.559041341145832,°C

@@ -1,0 +1,221 @@
+{
+  "number_of_cycles": 9,
+  "total_main_discharge_capacity_Ah": 119.00432054914407,
+  "total_main_discharge_energy_Wh": 5135.706723610282,
+  "total_net_removed_charge_Ah": 119.31701577266779,
+  "mean_main_discharge_current_A": -52.00927213153359,
+  "minimum_module_voltage_V": 39.599876403808594,
+  "maximum_voltage_recovery_V": 2.088642120361328,
+  "mean_dch_pulse_R_0p1s_mOhm": 17.545066675311112,
+  "mean_dch_pulse_R_10s_mOhm": 20.88863934481513,
+  "mean_dch_pulse_R_18s_mOhm": 22.218003703215654,
+  "maximum_cell_spread_mV": 16.935110092163086,
+  "minimum_cell_voltage_V": 3.291334867477417,
+  "maximum_module_temperature_C": 0.3939361572265625,
+  "mean_climate_temperature_C": -4.998837294121789,
+  "eis": {
+    "available": true,
+    "number_of_eis_sweeps": 9,
+    "number_of_eis_scan_sweeps": 9,
+    "number_of_eis_points": 27,
+    "number_of_eis_scan_points": 450,
+    "minimum_frequency_Hz": 0.10000000149011612,
+    "maximum_frequency_Hz": 5000.0
+  },
+  "test_id": "discharge_-5",
+  "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-16_17.45.34_schrw_Entladung_-5.mf4",
+  "temperature_C": -4.998837294121789,
+  "number_of_cells": 12,
+  "kpi_explanations": {
+    "test_temperature_C": {
+      "title": "Prüftemperatur",
+      "value": -4.998837294121789,
+      "unit": "°C",
+      "short": "Mittlere Klimatemperatur des Versuchs.",
+      "interpretation": "Sie beschreibt die thermische Versuchsbedingung."
+    },
+    "number_of_cycles": {
+      "title": "Diagnosezyklen",
+      "value": 9.0,
+      "unit": "-",
+      "short": "Anzahl der erkannten Diagnosezyklen.",
+      "interpretation": "Jeder Zyklus verbindet Hauptentladung, Ruhe, Pulse und EIS Messung."
+    },
+    "total_main_discharge_capacity_Ah": {
+      "title": "Hauptentladekapazität",
+      "value": 119.00432054914407,
+      "unit": "Ah",
+      "short": "Summe der während der Hauptentladungen entnommenen Ladungsmenge.",
+      "formula": "Q = 1/3600 · |∫ I(t) dt|",
+      "interpretation": "Diagnosepulse werden nicht als Teil der Hauptentladung gezählt."
+    },
+    "total_main_discharge_energy_Wh": {
+      "title": "Hauptentladeenergie",
+      "value": 5135.706723610282,
+      "unit": "Wh",
+      "short": "Während der Hauptentladungen abgegebene elektrische Energie.",
+      "formula": "E = 1/3600 · |∫ U(t) · I(t) dt|",
+      "interpretation": "Die Energie berücksichtigt Ladungsmenge und Spannungsniveau."
+    },
+    "total_net_removed_charge_Ah": {
+      "title": "Netto entnommene Ladung",
+      "value": 119.31701577266779,
+      "unit": "Ah",
+      "short": "Entnommene Ladung einschließlich diagnostischer Entlade- und Ladepulse.",
+      "interpretation": "Entladepulse erhöhen und Ladepulse verringern die Nettoentnahme."
+    },
+    "mean_main_discharge_current_A": {
+      "title": "Mittlerer Hauptentladestrom",
+      "value": -52.00927213153359,
+      "unit": "A",
+      "short": "Mittlerer Strom während der Hauptentladungen.",
+      "interpretation": "Entladestrom ist in den vorliegenden Messdaten negativ."
+    },
+    "minimum_module_voltage_V": {
+      "title": "Minimale Modulspannung",
+      "value": 39.599876403808594,
+      "unit": "V",
+      "short": "Niedrigste Modulspannung während der Hauptentladung.",
+      "interpretation": "Hilft beim Vergleich des Spannungseinbruchs zwischen Tests."
+    },
+    "maximum_voltage_recovery_V": {
+      "title": "Maximale Spannungserholung",
+      "value": 2.088642120361328,
+      "unit": "V",
+      "short": "Größter beobachteter Spannungsanstieg nach Hauptentladung.",
+      "interpretation": "Beschreibt die Erholung nach Lastabschaltung."
+    },
+    "mean_dch_pulse_R_0p1s_mOhm": {
+      "title": "Pulswiderstand nach 0,1 s",
+      "value": 17.545066675311112,
+      "unit": "mΩ",
+      "short": "Mittlerer Widerstand sehr früh im diagnostischen Entladepuls.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der Wert beschreibt die frühe dynamische Spannungsantwort."
+    },
+    "dch_pulse_R_2s_mOhm": {
+      "title": "Pulswiderstand nach 2 s",
+      "value": null,
+      "unit": "mΩ",
+      "short": "Zyklusweiser Widerstand zwei Sekunden nach Beginn des Entladepulses.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der 2-s-Wert wird pro Diagnosezyklus bereitgestellt."
+    },
+    "mean_dch_pulse_R_10s_mOhm": {
+      "title": "Pulswiderstand nach 10 s",
+      "value": 20.88863934481513,
+      "unit": "mΩ",
+      "short": "Mittlerer Widerstand zehn Sekunden nach Pulsbeginn.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der spätere Zeitpunkt enthält mehr von der zeitabhängigen Spannungsantwort."
+    },
+    "mean_dch_pulse_R_18s_mOhm": {
+      "title": "Pulswiderstand nach 18 s",
+      "value": 22.218003703215654,
+      "unit": "mΩ",
+      "short": "Mittlerer Widerstand gegen Ende des diagnostischen Entladepulses.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der Wert kann mit Prüfstandswerten gleichen Pulszeitpunkts verglichen werden."
+    },
+    "maximum_cell_spread_mV": {
+      "title": "Maximale Zellspannungsdifferenz",
+      "value": 16.935110092163086,
+      "unit": "mV",
+      "short": "Größte Differenz zwischen höchster und niedrigster Zellspannung.",
+      "formula": "ΔV_cell = V_max - V_min",
+      "interpretation": "Beschreibt die maximale Spannungsstreuung innerhalb des Moduls."
+    },
+    "minimum_cell_voltage_V": {
+      "title": "Niedrigste Zellspannung",
+      "value": 3.291334867477417,
+      "unit": "V",
+      "short": "Niedrigster beobachteter Einzelzellwert.",
+      "interpretation": "Hilft, die am stärksten abgesunkene Zelle zu erkennen."
+    },
+    "maximum_module_temperature_C": {
+      "title": "Maximale Modultemperatur",
+      "value": 0.3939361572265625,
+      "unit": "°C",
+      "short": "Höchste an den Modulsensoren gemessene Temperatur.",
+      "interpretation": "Die Modultemperatur kann sich von der Klimatemperatur unterscheiden."
+    },
+    "eis_scan_sweeps": {
+      "title": "Vollständige EIS-Scans",
+      "value": 9.0,
+      "unit": "-",
+      "short": "Anzahl der vollständigen frequenzaufgelösten EIS-Spektren.",
+      "interpretation": "Im aktuellen Datensatz gehört ein vollständiger Scan zu jedem Diagnosezyklus."
+    },
+    "eis_scan_points": {
+      "title": "EIS-Messpunkte",
+      "value": 450.0,
+      "unit": "-",
+      "short": "Gesamtzahl der Punkte in den vollständigen EIS-Scans.",
+      "interpretation": "Die Punkte verteilen sich auf Frequenzen und Diagnosezyklen."
+    },
+    "eis_frequency_range": {
+      "title": "EIS-Frequenzbereich",
+      "value": null,
+      "unit": "Hz",
+      "display_value": "0.1 bis 5000 Hz",
+      "short": "Frequenzbereich der vollständigen EIS-Spektren.",
+      "interpretation": "Die Frequenz bestimmt die betrachtete Zeitskala der Wechselstromantwort."
+    },
+    "eis_impedance_unit_note": {
+      "title": "EIS-Impedanzeinheit",
+      "value": null,
+      "unit": "",
+      "short": "Die MF4 Metadaten von Zre und Zim enthalten keine explizite Einheit.",
+      "interpretation": "Die Werte besitzen dieselbe numerische Skala wie die ACIR Referenzkanäle. Eine Darstellung in Ω beziehungsweise mΩ muss transparent dokumentiert werden."
+    },
+    "validation_capacity_mean_abs_deviation_pct": {
+      "title": "Validierung Kapazität",
+      "value": 0.0013551463908978037,
+      "unit": "%",
+      "short": "Mittlere absolute prozentuale Abweichung zwischen Python und Prüfstand.",
+      "interpretation": "Ein kleiner Wert unterstützt die Plausibilität der Berechnung."
+    },
+    "validation_energy_mean_abs_deviation_pct": {
+      "title": "Validierung Energie",
+      "value": 0.0013599999575740372,
+      "unit": "%",
+      "short": "Mittlere absolute prozentuale Abweichung zwischen Python und Prüfstand.",
+      "interpretation": "Ein kleiner Wert unterstützt die Plausibilität der Energieintegration."
+    }
+  },
+  "validation_notes": [
+    "sgl_q_mess_dch: tester values interpreted as As and converted to Ah using /3600.",
+    "sgl_e_mess_dch: tester values interpreted as Ws/J and converted to Wh using /3600.",
+    "sgl_Ri_dch01: MDF unit is empty. Median raw value = 0.0174179. Values interpreted as Ohm and converted to mOhm.",
+    "sgl_Ri_dch2: MDF unit is empty. Median raw value = 0.0185937. Values interpreted as Ohm and converted to mOhm.",
+    "sgl_Ri_dch10: MDF unit is empty. Median raw value = 0.0204709. Values interpreted as Ohm and converted to mOhm.",
+    "sgl_Ri_dch18: MDF unit is empty. Median raw value = 0.0220037. Values interpreted as Ohm and converted to mOhm."
+  ],
+  "eis_display": {
+    "separate_dashboard_page": false,
+    "nyquist_y": "-Zim",
+    "sign_convention": "Raw Zre/Zim values are preserved. The sign convention was verified against the ACIR reference channels.",
+    "mf4_impedance_unit": null,
+    "interpreted_impedance_unit": "Ohm",
+    "recommended_dashboard_unit": "mOhm",
+    "dashboard_scale_factor": 1000.0,
+    "unit_note": "The MF4 unit fields of Zre and Zim are empty. The Ohm interpretation is based on numerical scale and consistency with resistance data."
+  },
+  "interface": {
+    "learning_content_file": "learning_content.json",
+    "manifest_file": "manifest.json",
+    "data_files": {
+      "electrical": "electrical.csv",
+      "cycles": "cycles.csv",
+      "resistance": "resistance.csv",
+      "cells": "cells.csv",
+      "temperature": "temperature.csv",
+      "phases": "phases.csv",
+      "diagnostic_cycles": "diagnostic_cycles.csv",
+      "eis_points": "eis_points.csv",
+      "eis_scan": "eis_scan.csv",
+      "validation": "validation.csv",
+      "validation_summary": "validation_summary.csv"
+    }
+  }
+}

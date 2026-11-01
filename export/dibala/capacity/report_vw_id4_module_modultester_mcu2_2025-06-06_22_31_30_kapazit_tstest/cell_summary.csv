@@ -1,0 +1,6 @@
+metric,value,unit
+Anzahl erkannter Zellen,12,
+Zelle mit niedrigster Spannung,cell_07_V,
+Niedrigste Zellspannung,3.2939023971557617,V
+Maximale Zellspannungsdifferenz,10.61868667602539,mV
+Mittlere Zellspannungsdifferenz,4.960502312057747,mV

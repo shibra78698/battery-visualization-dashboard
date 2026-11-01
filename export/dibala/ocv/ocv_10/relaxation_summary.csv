@@ -1,0 +1,18 @@
+metric,value,unit
+Relaxationsdauer,1.6594551491666547,h
+Spannung am Ende der Lastphase,39.68759536743164,V
+Spannung zu Beginn der Relaxation,39.7639274597168,V
+Spannung am Ende der Relaxation,40.61174392700195,V
+Sofortige Spannungserholung,0.07633209228515625,V
+Weitere Relaxation,0.8478164672851562,V
+Gesamte Spannungserholung,0.9241485595703125,V
+Maximaler Strombetrag während Relaxation,0.22869110107421875,A
+Gradient der letzten 10 Minuten,0.6593256573806933,mV/min
+Spannung nach 1 min,40.15151889066705,V
+Spannungserholung nach 1 min,0.4639235232354082,V
+Spannung nach 10 min,40.43487545085909,V
+Spannungserholung nach 10 min,0.747280083427448,V
+Spannung nach 30 min,40.53027588422778,V
+Spannungserholung nach 30 min,0.8426805167961362,V
+Spannung nach 60 min,40.579739351978304,V
+Spannungserholung nach 60 min,0.8921439845466637,V

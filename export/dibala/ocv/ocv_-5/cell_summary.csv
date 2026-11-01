@@ -1,0 +1,9 @@
+metric,value,unit
+Anzahl erkannter Zellen,12,
+Zelle mit niedrigster Spannung,cell_12_V,
+Niedrigste Zellspannung,3.2869577407836914,V
+Maximale Zellspannungsdifferenz während Entladung,27.875185012817383,mV
+Mittlere Zellspannungsdifferenz während Entladung,4.169504502782691,mV
+Zellspannungsdifferenz zu Beginn der Relaxation,25.992155075073242,mV
+Zellspannungsdifferenz nach 60 min Relaxation,3.2934326171979444,mV
+Zellspannungsdifferenz am Ende der Relaxation,3.0922889709472656,mV

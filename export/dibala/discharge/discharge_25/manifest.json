@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "test_type": "discharge",
+  "test_id": "discharge_25",
+  "source_file": "Report_VW_ID4_Module_Modultester_MCU2_2025-06-06_22.31.30_schrw_Entladung_25.mf4",
+  "temperature_C": 24.993549241345935,
+  "number_of_cells": 12,
+  "eis_integrated_in_discharge": true,
+  "analysis": {
+    "kpis_calculated_from_full_resolution_data": true,
+    "visualization_data_downsampled": true,
+    "maximum_visualization_rows": 10000,
+    "native_timestamps_used_for_analysis": true,
+    "tester_validation_included": true,
+    "eis_scan_downsampled": false
+  },
+  "files": {
+    "summary": "discharge_summary.json",
+    "learning_content": "learning_content.json",
+    "electrical": {
+      "file": "electrical.csv",
+      "rows": 9998,
+      "columns": 11
+    },
+    "cycles": {
+      "file": "cycles.csv",
+      "rows": 9,
+      "columns": 54
+    },
+    "resistance": {
+      "file": "resistance.csv",
+      "rows": 9,
+      "columns": 15
+    },
+    "cells": {
+      "file": "cells.csv",
+      "rows": 9997,
+      "columns": 21
+    },
+    "temperature": {
+      "file": "temperature.csv",
+      "rows": 9997,
+      "columns": 13
+    },
+    "phases": {
+      "file": "phases.csv",
+      "rows": 56,
+      "columns": 17
+    },
+    "diagnostic_cycles": {
+      "file": "diagnostic_cycles.csv",
+      "rows": 9,
+      "columns": 4
+    },
+    "eis_points": {
+      "file": "eis_points.csv",
+      "rows": 27,
+      "columns": 10
+    },
+    "eis_scan": {
+      "file": "eis_scan.csv",
+      "rows": 450,
+      "columns": 10
+    },
+    "validation": {
+      "file": "validation.csv",
+      "rows": 54,
+      "columns": 9
+    },
+    "validation_summary": {
+      "file": "validation_summary.csv",
+      "rows": 6,
+      "columns": 6
+    }
+  }
+}

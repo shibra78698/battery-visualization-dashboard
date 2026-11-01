@@ -1,0 +1,818 @@
+{
+  "schema_version": "1.0",
+  "language": "de",
+  "topic": "discharge_and_eis",
+  "scope": "single_test",
+  "dashboard_page": "discharge",
+  "eis_separate_page": false,
+  "display_references": false,
+  "learning_objectives": [
+    {
+      "id": "discharge_objective_01",
+      "knowledge_type": "factual",
+      "text": "Kapazität, Energie, Spannung und Pulswiderstand als zentrale Größen des Entladeverhaltens beschreiben."
+    },
+    {
+      "id": "discharge_objective_02",
+      "knowledge_type": "conceptual",
+      "text": "Den Einfluss der Temperatur auf nutzbare Entladung, Spannungslage und Widerstand interpretieren."
+    },
+    {
+      "id": "discharge_objective_03",
+      "knowledge_type": "procedural",
+      "text": "Hauptentladung, Ruhephase und diagnostische Strompulse in der Messung unterscheiden."
+    },
+    {
+      "id": "discharge_objective_04",
+      "knowledge_type": "conceptual",
+      "text": "Den relativen Entladefortschritt korrekt interpretieren und von einem absolut kalibrierten SOC oder DoD unterscheiden."
+    },
+    {
+      "id": "discharge_objective_05",
+      "knowledge_type": "procedural",
+      "text": "Pulswiderstände aus Spannungs- und Stromänderungen interpretieren."
+    },
+    {
+      "id": "discharge_objective_06",
+      "knowledge_type": "conceptual",
+      "text": "Zellspannungsdifferenzen und thermisches Verhalten als ergänzende Modulkennwerte einordnen."
+    },
+    {
+      "id": "eis_objective_01",
+      "knowledge_type": "factual",
+      "text": "EIS als frequenzabhängige Messung der komplexen Impedanz beschreiben."
+    },
+    {
+      "id": "eis_objective_02",
+      "knowledge_type": "procedural",
+      "text": "Nyquist Diagramm, Bode Betrag und Bode Phase lesen."
+    },
+    {
+      "id": "eis_objective_03",
+      "knowledge_type": "conceptual",
+      "text": "EIS Spektren vorsichtig vergleichen, ohne einzelne Kurvenbereiche ohne zusätzliches Modell eindeutig einem elektrochemischen Prozess zuzuordnen."
+    },
+    {
+      "id": "discharge_objective_07",
+      "knowledge_type": "transfer",
+      "text": "Die Auswertelogik auf neue Temperaturen, weitere Diagnosezyklen und andere Zellzahlen übertragen."
+    }
+  ],
+  "theory": [
+    {
+      "id": "discharge_theory_01",
+      "title": "Was wird beim Entladeverhalten untersucht?",
+      "text": "Beim Entladen werden elektrische Ladung und Energie aus der Batterie entnommen. Gleichzeitig verändern sich Spannung, Temperatur und die Reaktion auf kurze Strompulse.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_theory_02",
+      "title": "Kapazität und Energie sind nicht dasselbe",
+      "text": "Die Kapazität beschreibt die entnommene Ladungsmenge in Ah. Die Energie in Wh berücksichtigt zusätzlich das Spannungsniveau während der Entladung.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_theory_03",
+      "title": "Warum beeinflusst die Temperatur die Entladung?",
+      "text": "Die Temperatur beeinflusst Transport-, Reaktions- und Verlustprozesse. Bei niedrigen Temperaturen können nutzbare Kapazität und Leistungsfähigkeit sinken und die Impedanz ansteigen.",
+      "source_ids": [
+        "ma_2018",
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_theory_04",
+      "title": "Was bedeutet Spannungserholung?",
+      "text": "Nach dem Ende eines belasteten Entladeabschnitts kann die Klemmenspannung wieder ansteigen. Dieser Anstieg wird hier als Spannungserholung beschrieben.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_theory_05",
+      "title": "Was beschreibt der Pulswiderstand?",
+      "text": "Bei einem Strompuls verändert sich die Batteriespannung. Aus Spannungsänderung und Stromänderung wird ein zeitabhängiger Pulswiderstand bestimmt.",
+      "formula": "R = |ΔU / ΔI|",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_theory_06",
+      "title": "Warum werden mehrere Pulszeitpunkte betrachtet?",
+      "text": "Die Spannungsantwort entwickelt sich während des Pulses weiter. Deshalb werden Widerstände nach 0,1, 2, 10 und 18 Sekunden getrennt betrachtet.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_theory_07",
+      "title": "Was zeigt der Zellspannungs Spread?",
+      "text": "Der Zellspannungs Spread ist die Differenz zwischen der höchsten und niedrigsten Zellspannung zu einem Zeitpunkt.",
+      "formula": "ΔV_cell = V_max - V_min",
+      "source_ids": []
+    },
+    {
+      "id": "eis_theory_01",
+      "title": "Was ist elektrochemische Impedanzspektroskopie?",
+      "text": "Bei der EIS wird die Antwort der Batterie auf eine kleine Wechselanregung bei verschiedenen Frequenzen untersucht. Das Ergebnis ist eine komplexe frequenzabhängige Impedanz.",
+      "formula": "Z(f) = Z'(f) + j · Z''(f)",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_theory_02",
+      "title": "Wie wird ein Nyquist Diagramm gelesen?",
+      "text": "Im Nyquist Diagramm wird der Realteil Z' gegen den negativen Imaginärteil -Z'' dargestellt. Jeder Punkt gehört zu einer bestimmten Frequenz.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_theory_03",
+      "title": "Was zeigen Bode Betrag und Bode Phase?",
+      "text": "Der Bode Betrag zeigt |Z| über der Frequenz. Die Bode Phase zeigt den Phasenwinkel der komplexen Impedanz über der Frequenz.",
+      "formula": "|Z| = √(Z'² + Z''²),  φ = atan2(Z'', Z')",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_theory_04",
+      "title": "Warum wird die EIS hier bewusst einfach interpretiert?",
+      "text": "Eine eindeutige Zuordnung einzelner Spektralbereiche zu physikalischen Prozessen erfordert zusätzliche Modellierung und Versuchskenntnis. Deshalb beschränkt sich diese Arbeit auf Nyquist-, Bode- und Vergleichsdarstellungen.",
+      "source_ids": [
+        "meddings_2020",
+        "iurilli_2021"
+      ]
+    },
+    {
+      "id": "eis_theory_05",
+      "title": "Welche EIS Vorzeichenkonvention wird verwendet?",
+      "text": "Die Rohkanäle Zre und Zim werden unverändert übernommen. Die Prüfung mit den ACIR Referenzkanälen bei 10, 100 und 1000 Hz bestätigte dieselbe Vorzeichenkonvention.",
+      "source_ids": [
+        "internal_eis_verification"
+      ]
+    }
+  ],
+  "kpi_explanations": {
+    "test_temperature_C": {
+      "title": "Prüftemperatur",
+      "value": 0.004027503881579341,
+      "unit": "°C",
+      "short": "Mittlere Klimatemperatur des Versuchs.",
+      "interpretation": "Sie beschreibt die thermische Versuchsbedingung."
+    },
+    "number_of_cycles": {
+      "title": "Diagnosezyklen",
+      "value": 9.0,
+      "unit": "-",
+      "short": "Anzahl der erkannten Diagnosezyklen.",
+      "interpretation": "Jeder Zyklus verbindet Hauptentladung, Ruhe, Pulse und EIS Messung."
+    },
+    "total_main_discharge_capacity_Ah": {
+      "title": "Hauptentladekapazität",
+      "value": 123.08793653318841,
+      "unit": "Ah",
+      "short": "Summe der während der Hauptentladungen entnommenen Ladungsmenge.",
+      "formula": "Q = 1/3600 · |∫ I(t) dt|",
+      "interpretation": "Diagnosepulse werden nicht als Teil der Hauptentladung gezählt."
+    },
+    "total_main_discharge_energy_Wh": {
+      "title": "Hauptentladeenergie",
+      "value": 5334.103997878705,
+      "unit": "Wh",
+      "short": "Während der Hauptentladungen abgegebene elektrische Energie.",
+      "formula": "E = 1/3600 · |∫ U(t) · I(t) dt|",
+      "interpretation": "Die Energie berücksichtigt Ladungsmenge und Spannungsniveau."
+    },
+    "total_net_removed_charge_Ah": {
+      "title": "Netto entnommene Ladung",
+      "value": 123.40060731909217,
+      "unit": "Ah",
+      "short": "Entnommene Ladung einschließlich diagnostischer Entlade- und Ladepulse.",
+      "interpretation": "Entladepulse erhöhen und Ladepulse verringern die Nettoentnahme."
+    },
+    "mean_main_discharge_current_A": {
+      "title": "Mittlerer Hauptentladestrom",
+      "value": -52.009780622930606,
+      "unit": "A",
+      "short": "Mittlerer Strom während der Hauptentladungen.",
+      "interpretation": "Entladestrom ist in den vorliegenden Messdaten negativ."
+    },
+    "minimum_module_voltage_V": {
+      "title": "Minimale Modulspannung",
+      "value": 39.59953308105469,
+      "unit": "V",
+      "short": "Niedrigste Modulspannung während der Hauptentladung.",
+      "interpretation": "Hilft beim Vergleich des Spannungseinbruchs zwischen Tests."
+    },
+    "maximum_voltage_recovery_V": {
+      "title": "Maximale Spannungserholung",
+      "value": 1.9420051574707031,
+      "unit": "V",
+      "short": "Größter beobachteter Spannungsanstieg nach Hauptentladung.",
+      "interpretation": "Beschreibt die Erholung nach Lastabschaltung."
+    },
+    "mean_dch_pulse_R_0p1s_mOhm": {
+      "title": "Pulswiderstand nach 0,1 s",
+      "value": 14.335981572353635,
+      "unit": "mΩ",
+      "short": "Mittlerer Widerstand sehr früh im diagnostischen Entladepuls.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der Wert beschreibt die frühe dynamische Spannungsantwort."
+    },
+    "dch_pulse_R_2s_mOhm": {
+      "title": "Pulswiderstand nach 2 s",
+      "value": null,
+      "unit": "mΩ",
+      "short": "Zyklusweiser Widerstand zwei Sekunden nach Beginn des Entladepulses.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der 2-s-Wert wird pro Diagnosezyklus bereitgestellt."
+    },
+    "mean_dch_pulse_R_10s_mOhm": {
+      "title": "Pulswiderstand nach 10 s",
+      "value": 17.232681468096136,
+      "unit": "mΩ",
+      "short": "Mittlerer Widerstand zehn Sekunden nach Pulsbeginn.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der spätere Zeitpunkt enthält mehr von der zeitabhängigen Spannungsantwort."
+    },
+    "mean_dch_pulse_R_18s_mOhm": {
+      "title": "Pulswiderstand nach 18 s",
+      "value": 18.4416929283287,
+      "unit": "mΩ",
+      "short": "Mittlerer Widerstand gegen Ende des diagnostischen Entladepulses.",
+      "formula": "R = |ΔU / ΔI|",
+      "interpretation": "Der Wert kann mit Prüfstandswerten gleichen Pulszeitpunkts verglichen werden."
+    },
+    "maximum_cell_spread_mV": {
+      "title": "Maximale Zellspannungsdifferenz",
+      "value": 15.997648239135742,
+      "unit": "mV",
+      "short": "Größte Differenz zwischen höchster und niedrigster Zellspannung.",
+      "formula": "ΔV_cell = V_max - V_min",
+      "interpretation": "Beschreibt die maximale Spannungsstreuung innerhalb des Moduls."
+    },
+    "minimum_cell_voltage_V": {
+      "title": "Niedrigste Zellspannung",
+      "value": 3.2919604778289795,
+      "unit": "V",
+      "short": "Niedrigster beobachteter Einzelzellwert.",
+      "interpretation": "Hilft, die am stärksten abgesunkene Zelle zu erkennen."
+    },
+    "maximum_module_temperature_C": {
+      "title": "Maximale Modultemperatur",
+      "value": 3.61907958984375,
+      "unit": "°C",
+      "short": "Höchste an den Modulsensoren gemessene Temperatur.",
+      "interpretation": "Die Modultemperatur kann sich von der Klimatemperatur unterscheiden."
+    },
+    "eis_scan_sweeps": {
+      "title": "Vollständige EIS-Scans",
+      "value": 9.0,
+      "unit": "-",
+      "short": "Anzahl der vollständigen frequenzaufgelösten EIS-Spektren.",
+      "interpretation": "Im aktuellen Datensatz gehört ein vollständiger Scan zu jedem Diagnosezyklus."
+    },
+    "eis_scan_points": {
+      "title": "EIS-Messpunkte",
+      "value": 450.0,
+      "unit": "-",
+      "short": "Gesamtzahl der Punkte in den vollständigen EIS-Scans.",
+      "interpretation": "Die Punkte verteilen sich auf Frequenzen und Diagnosezyklen."
+    },
+    "eis_frequency_range": {
+      "title": "EIS-Frequenzbereich",
+      "value": null,
+      "unit": "Hz",
+      "display_value": "0.1 bis 5000 Hz",
+      "short": "Frequenzbereich der vollständigen EIS-Spektren.",
+      "interpretation": "Die Frequenz bestimmt die betrachtete Zeitskala der Wechselstromantwort."
+    },
+    "eis_impedance_unit_note": {
+      "title": "EIS-Impedanzeinheit",
+      "value": null,
+      "unit": "",
+      "short": "Die MF4 Metadaten von Zre und Zim enthalten keine explizite Einheit.",
+      "interpretation": "Die Werte besitzen dieselbe numerische Skala wie die ACIR Referenzkanäle. Eine Darstellung in Ω beziehungsweise mΩ muss transparent dokumentiert werden."
+    },
+    "validation_capacity_mean_abs_deviation_pct": {
+      "title": "Validierung Kapazität",
+      "value": 0.0014016093928811194,
+      "unit": "%",
+      "short": "Mittlere absolute prozentuale Abweichung zwischen Python und Prüfstand.",
+      "interpretation": "Ein kleiner Wert unterstützt die Plausibilität der Berechnung."
+    },
+    "validation_energy_mean_abs_deviation_pct": {
+      "title": "Validierung Energie",
+      "value": 0.0013565944607960196,
+      "unit": "%",
+      "short": "Mittlere absolute prozentuale Abweichung zwischen Python und Prüfstand.",
+      "interpretation": "Ein kleiner Wert unterstützt die Plausibilität der Energieintegration."
+    }
+  },
+  "graph_explanations": [
+    {
+      "id": "voltage_current_time",
+      "section": "discharge",
+      "title": "Spannung und Strom über der Zeit",
+      "what": "Die Grafik zeigt Modulspannung und Strom über den gesamten Entladeversuch.",
+      "focus": "Achte auf Hauptentladungen, Ruhephasen und diagnostische Strompulse.",
+      "interpretation": "Diagnoseabschnitte werden separat erkannt, damit sie die Hauptentladung nicht verfälschen.",
+      "hover_help": "Zeit, Spannung, Strom, Zyklus und Phase anzeigen.",
+      "hover_fields": [
+        "Zeit",
+        "Spannung",
+        "Strom",
+        "Zyklus",
+        "Phase"
+      ],
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "voltage_relative_discharge",
+      "section": "discharge",
+      "title": "Spannung über relativem Entladefortschritt",
+      "what": "Die Grafik zeigt die Modulspannung über dem relativen Entladefortschritt.",
+      "focus": "Achte darauf, wie sich die Spannung mit fortschreitender Entladung verändert.",
+      "interpretation": "Der relative Entladefortschritt ist eine messungsbezogene Größe und kein absoluter SOC.",
+      "hover_help": "Zyklus, Entladefortschritt, Spannung und entnommene Ladung anzeigen.",
+      "hover_fields": [
+        "Zyklus",
+        "Entladefortschritt",
+        "Spannung",
+        "Entnommene Ladung"
+      ],
+      "source_ids": []
+    },
+    {
+      "id": "voltage_recovery_cycle",
+      "section": "discharge",
+      "title": "Spannungserholung nach Hauptentladung",
+      "what": "Vergleicht die Spannungserholung der einzelnen Diagnosezyklen.",
+      "focus": "Vergleiche frühe und späte Zyklen.",
+      "interpretation": "Eine größere Erholung beschreibt einen stärkeren Spannungsanstieg, ohne daraus allein eine eindeutige Ursache abzuleiten.",
+      "hover_help": "Zyklus, Entladefortschritt und Spannungserholung anzeigen.",
+      "hover_fields": [
+        "Zyklus",
+        "Entladefortschritt",
+        "Spannungserholung"
+      ],
+      "source_ids": []
+    },
+    {
+      "id": "pulse_resistance_progress",
+      "section": "resistance",
+      "title": "Pulswiderstand über Entladefortschritt",
+      "what": "Zeigt die Widerstände nach 0,1, 2, 10 und 18 Sekunden für die Diagnosezyklen.",
+      "focus": "Vergleiche Entwicklung über Entladefortschritt und Unterschiede zwischen Pulszeitpunkten.",
+      "interpretation": "Ein Widerstandswert muss immer zusammen mit seinem Auswertezeitpunkt interpretiert werden.",
+      "hover_help": "Zyklus, Entladefortschritt, Pulszeitpunkt, Widerstand und Temperatur anzeigen.",
+      "hover_fields": [
+        "Zyklus",
+        "Entladefortschritt",
+        "Pulszeitpunkt",
+        "Widerstand",
+        "Temperatur"
+      ],
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "cell_voltages",
+      "section": "cells",
+      "title": "Einzelzellspannungen",
+      "what": "Zeigt die Spannungsverläufe der Einzelzellen.",
+      "focus": "Achte darauf, ob einzelne Zellen stärker absinken als andere.",
+      "interpretation": "Abweichungen werden als Beobachtung und nicht direkt als Fehlerursache dargestellt.",
+      "hover_help": "Zeit, Zelle, Zellspannung und Zyklus anzeigen.",
+      "hover_fields": [
+        "Zeit",
+        "Zelle",
+        "Zellspannung",
+        "Zyklus"
+      ],
+      "source_ids": []
+    },
+    {
+      "id": "cell_spread",
+      "section": "cells",
+      "title": "Zellspannungsdifferenz",
+      "what": "Zeigt die Differenz zwischen höchster und niedrigster Zellspannung.",
+      "focus": "Vergleiche den Zellspread über Entladefortschritt und Temperatur.",
+      "interpretation": "Ein größerer Spread bedeutet eine größere momentane Streuung der Zellspannungen.",
+      "hover_help": "Zyklus, Entladefortschritt und Zellspread anzeigen.",
+      "hover_fields": [
+        "Zyklus",
+        "Entladefortschritt",
+        "Zellspannungsdifferenz"
+      ],
+      "source_ids": []
+    },
+    {
+      "id": "module_temperature_progress",
+      "section": "temperature",
+      "title": "Modultemperatur über Entladefortschritt",
+      "what": "Zeigt die Entwicklung der gemessenen Modultemperaturen während der Entladung.",
+      "focus": "Vergleiche Klima- und Modultemperatur.",
+      "interpretation": "Die Modultemperatur muss nicht exakt der Klimatemperatur entsprechen.",
+      "hover_help": "Zyklus, Entladefortschritt und Temperaturen anzeigen.",
+      "hover_fields": [
+        "Zyklus",
+        "Entladefortschritt",
+        "Klimatemperatur",
+        "Modultemperatur"
+      ],
+      "source_ids": [
+        "ma_2018"
+      ]
+    },
+    {
+      "id": "eis_nyquist",
+      "section": "eis",
+      "dashboard_page": "discharge",
+      "title": "EIS: Nyquist Diagramm",
+      "what": "Zeigt Z' auf der x-Achse und -Z'' auf der y-Achse für den ausgewählten Diagnosezyklus.",
+      "focus": "Achte auf Form, Lage und Veränderungen zwischen Zyklen oder Temperaturen.",
+      "interpretation": "Jeder Punkt gehört zu einer Frequenz. Einzelne Bereiche werden ohne Modell nicht eindeutig einem Prozess zugeordnet.",
+      "hover_help": "Frequenz, Z', Z'', |Z|, Phase, Zyklus und Entladefortschritt anzeigen.",
+      "hover_fields": [
+        "Frequenz",
+        "Z'",
+        "Z''",
+        "|Z|",
+        "Phase",
+        "Zyklus",
+        "Entladefortschritt"
+      ],
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_bode_magnitude",
+      "section": "eis",
+      "dashboard_page": "discharge",
+      "title": "EIS: Bode-Betrag",
+      "what": "Zeigt den Impedanzbetrag |Z| über der Frequenz.",
+      "focus": "Achte auf den Verlauf über die Frequenz und auf Verschiebungen zwischen Zyklen.",
+      "interpretation": "Der Betrag fasst Real- und Imaginärteil zu einer positiven Größe zusammen.",
+      "hover_help": "Frequenz, |Z|, Zyklus und Entladefortschritt anzeigen.",
+      "hover_fields": [
+        "Frequenz",
+        "|Z|",
+        "Zyklus",
+        "Entladefortschritt"
+      ],
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_bode_phase",
+      "section": "eis",
+      "dashboard_page": "discharge",
+      "title": "EIS: Bode-Phase",
+      "what": "Zeigt die Phase der komplexen Impedanz über der Frequenz.",
+      "focus": "Achte darauf, wie sich der Phasenwinkel mit Frequenz und Zyklus verändert.",
+      "interpretation": "Die Phase wird aus atan2(Z'', Z') berechnet und folgt der verifizierten Rohdatenkonvention.",
+      "hover_help": "Frequenz, Phase, Z', Z'', Zyklus und Entladefortschritt anzeigen.",
+      "hover_fields": [
+        "Frequenz",
+        "Phase",
+        "Z'",
+        "Z''",
+        "Zyklus",
+        "Entladefortschritt"
+      ],
+      "source_ids": [
+        "meddings_2020",
+        "internal_eis_verification"
+      ]
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "discharge_quiz_01",
+      "knowledge_type": "conceptual",
+      "question": "Was beschreibt der relative Entladefortschritt?",
+      "options": [
+        "Den absolut kalibrierten SOC.",
+        "Die bis zum Diagnosepunkt entnommene Ladung relativ zur Entnahme am letzten Diagnosepunkt.",
+        "Die Anzahl der EIS Frequenzen.",
+        "Die maximale Zelltemperatur."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Es ist eine messungsbezogene Fortschrittsgröße.",
+      "feedback_incorrect": "Der Wert wird aus der innerhalb dieses Versuchs entnommenen Ladung gebildet.",
+      "explanation": "Er darf nicht ohne zusätzliche Kalibrierung als absoluter SOC oder DoD interpretiert werden.",
+      "source_ids": []
+    },
+    {
+      "id": "discharge_quiz_02",
+      "knowledge_type": "procedural",
+      "question": "Wie wird der Pulswiderstand bestimmt?",
+      "options": [
+        "R = |ΔU / ΔI|",
+        "R = U · I",
+        "R = Q / t",
+        "R = E / Q"
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. Spannungs- und Stromänderung werden ins Verhältnis gesetzt.",
+      "feedback_incorrect": "Betrachte Spannungs- und Stromänderung vor und während des Pulses.",
+      "explanation": "Das Ergebnis wird in der Analyse in mΩ dargestellt.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_quiz_03",
+      "knowledge_type": "conceptual",
+      "question": "Warum werden Pulswiderstände nach 0,1, 2, 10 und 18 Sekunden getrennt betrachtet?",
+      "options": [
+        "Weil der Widerstand immer exakt gleich ist.",
+        "Weil sich die Spannungsantwort während des Pulses zeitabhängig entwickelt.",
+        "Weil jeder Zeitpunkt eine andere Zellzahl verwendet.",
+        "Weil nur der 18-s-Wert aus Spannung und Strom berechnet wird."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Der Auswertezeitpunkt gehört zur Definition des Pulswiderstands.",
+      "feedback_incorrect": "Die Spannung entwickelt sich während des Strompulses weiter.",
+      "explanation": "Widerstände verschiedener Pulsdauer sind nicht identisch definiert.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_quiz_04",
+      "knowledge_type": "conceptual",
+      "question": "Im Versuch bei 0 °C beträgt die Hauptentladekapazität etwa 123.09 Ah und die Energie etwa 5.33 kWh. Welche Aussage ist korrekt?",
+      "options": [
+        "Kapazität und Energie sind identische Größen.",
+        "Die Energie berücksichtigt zusätzlich das Spannungsniveau während der Entladung.",
+        "Die Energie wird nur aus der Endspannung bestimmt.",
+        "Die Kapazität wird aus den EIS-Daten berechnet."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Energie integriert Spannung mal Strom über die Zeit.",
+      "feedback_incorrect": "Kapazität basiert auf Stromintegration; Energie berücksichtigt zusätzlich Spannung.",
+      "explanation": "Darum können ähnliche Kapazitäten mit unterschiedlicher Energie verbunden sein.",
+      "source_ids": [
+        "stroe_2016"
+      ]
+    },
+    {
+      "id": "discharge_quiz_05",
+      "knowledge_type": "conceptual",
+      "question": "Was beschreibt die maximale Zellspannungsdifferenz?",
+      "options": [
+        "Die Differenz zwischen höchster und niedrigster Zellspannung.",
+        "Die Differenz zwischen Strom und Spannung.",
+        "Die Temperaturdifferenz zwischen Prüfkammer und Modul.",
+        "Die Differenz zwischen 0,1-s- und 18-s-Widerstand."
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. Der Zellspread beschreibt die Spannungsstreuung im Modul.",
+      "feedback_incorrect": "Verglichen werden höchste und niedrigste Zellspannung zum gleichen Zeitpunkt.",
+      "explanation": "Ein großer Spread ist zunächst eine Messbeobachtung.",
+      "source_ids": []
+    },
+    {
+      "id": "eis_quiz_01",
+      "knowledge_type": "factual",
+      "question": "Was beschreibt EIS in dieser Auswertung?",
+      "options": [
+        "Die frequenzabhängige komplexe Impedanz der Batterie.",
+        "Nur die Gleichspannung am Ende der Entladung.",
+        "Nur die Modultemperatur.",
+        "Die Anzahl der Batteriezellen."
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. EIS untersucht die komplexe Impedanz über einen Frequenzbereich.",
+      "feedback_incorrect": "EIS liefert Real- und Imaginärteil über verschiedene Frequenzen.",
+      "explanation": "Die vollständigen Scans werden in Nyquist- und Bode-Darstellungen visualisiert.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_quiz_02",
+      "knowledge_type": "procedural",
+      "question": "Welche Achsen werden für das Nyquist Diagramm verwendet?",
+      "options": [
+        "x = Z', y = -Z''",
+        "x = Frequenz, y = |Z|",
+        "x = Zeit, y = Spannung",
+        "x = Temperatur, y = Phase"
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. Die Frequenz gehört jeweils zum Punkt.",
+      "feedback_incorrect": "Im Nyquist Diagramm wird Realteil gegen negativen Imaginärteil aufgetragen.",
+      "explanation": "Für die direkte Frequenzdarstellung werden Bode Plots verwendet.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_quiz_03",
+      "knowledge_type": "procedural",
+      "question": "Was zeigt der Bode Betrag?",
+      "options": [
+        "Den Betrag |Z| der komplexen Impedanz über der Frequenz.",
+        "Nur den Realteil über der Zeit.",
+        "Die Zelltemperatur über dem SOC.",
+        "Den Ladezustand direkt in Prozent."
+      ],
+      "correct_option": 0,
+      "feedback_correct": "Richtig. |Z| fasst Real- und Imaginärteil zu einer positiven Größe zusammen.",
+      "feedback_incorrect": "Der Bode Betrag wird aus Z' und Z'' berechnet.",
+      "explanation": "Zusammen mit der Phase zeigt er die Frequenzantwort kompakt.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    },
+    {
+      "id": "eis_quiz_04",
+      "knowledge_type": "conceptual",
+      "question": "Warum werden Nyquist Bereiche hier nicht direkt als SEI-, Ladungsübertragungs- oder Diffusionsanteil bezeichnet?",
+      "options": [
+        "Weil EIS keine physikalischen Informationen enthält.",
+        "Weil eine eindeutige Zuordnung zusätzliche Modellierung und Validierung erfordert.",
+        "Weil nur eine Frequenz gemessen wurde.",
+        "Weil Nyquist Diagramme keine Impedanzwerte enthalten."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Die Interpretation bleibt auf das sicher Unterstützte begrenzt.",
+      "feedback_incorrect": "Spektralmerkmale sind nicht automatisch eindeutige Prozessmarker.",
+      "explanation": "Deshalb werden Nyquist, Bode Betrag und Bode Phase ohne Ersatzschaltbild-Fit verwendet.",
+      "source_ids": [
+        "meddings_2020",
+        "iurilli_2021"
+      ]
+    },
+    {
+      "id": "eis_quiz_05",
+      "knowledge_type": "procedural",
+      "question": "Was hat die ACIR Prüfung für Zre und Zim gezeigt?",
+      "options": [
+        "Die Vorzeichen müssen umgedreht werden.",
+        "Die Rohwerte stimmen bei 10, 100 und 1000 Hz mit den ACIR Referenzkanälen überein.",
+        "Nur Zre stimmt überein.",
+        "Die EIS-Daten können nicht verwendet werden."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Die Rohdatenkonvention bleibt unverändert.",
+      "feedback_incorrect": "Die Verifikation ergab KEEP_RAW_SIGN für alle fünf Temperaturtests.",
+      "explanation": "Für Nyquist wird lediglich -Z'' als Darstellungsgröße verwendet.",
+      "source_ids": [
+        "internal_eis_verification"
+      ]
+    },
+    {
+      "id": "discharge_quiz_validation",
+      "knowledge_type": "procedural",
+      "question": "Warum werden die Python KPIs mit den Prüfstandswerten verglichen?",
+      "options": [
+        "Damit der Prüfstand die Python Berechnung ersetzt.",
+        "Zur Plausibilisierung der eigenständigen Python Auswertung.",
+        "Damit keine MF4 Rohdaten mehr benötigt werden.",
+        "Um EIS aus Kapazität zu berechnen."
+      ],
+      "correct_option": 1,
+      "feedback_correct": "Richtig. Die Prüfstandskanäle dienen als Referenz.",
+      "feedback_incorrect": "Die eigentlichen KPIs werden aus den Messsignalen berechnet.",
+      "explanation": "Mittlere absolute Abweichung: 0.0014 % für Kapazität und 0.0014 % für Energie.",
+      "source_ids": []
+    }
+  ],
+  "reflections": [
+    {
+      "id": "discharge_reflection_01",
+      "knowledge_type": "conceptual",
+      "prompt": "Der ausgewählte Versuch wurde bei ungefähr 0 °C durchgeführt. Welche Messgrößen würdest du gemeinsam betrachten, bevor du die Entladeperformance nur mit der Temperatur erklärst?",
+      "minimum_input_characters": 35,
+      "model_answer": "Neben der Temperatur sollten Kapazität, Energie, Spannungsverlauf, Entladefortschritt, Pulswiderstand, Zellspannungs-Spread und Modultemperaturen gemeinsam betrachtet werden.",
+      "source_ids": [
+        "stroe_2016",
+        "ma_2018"
+      ]
+    },
+    {
+      "id": "discharge_reflection_02",
+      "knowledge_type": "conceptual",
+      "prompt": "Der maximale Zellspannungs Spread beträgt etwa 16.00 mV. Warum sollte daraus nicht direkt eine bestimmte Zellfehlerursache abgeleitet werden?",
+      "minimum_input_characters": 30,
+      "model_answer": "Der Spread beschreibt zunächst nur eine Spannungsdifferenz. Für eine Fehlerdiagnose wären zusätzliche Informationen zu Zellzustand, Temperatur, Belastung und Alterung nötig.",
+      "source_ids": []
+    },
+    {
+      "id": "eis_reflection_01",
+      "knowledge_type": "conceptual",
+      "prompt": "Welche zusätzlichen Informationen oder Modelle wären notwendig, bevor du ein Nyquist Merkmal eindeutig einem einzelnen elektrochemischen Prozess zuordnest?",
+      "minimum_input_characters": 35,
+      "model_answer": "Hilfreich wären ein bekanntes Messprotokoll, Qualitäts- und Reproduzierbarkeitsprüfungen, ein physikalisches Modell sowie Vergleichsmessungen bei definiertem SOC, Temperatur und Alterungszustand.",
+      "source_ids": [
+        "meddings_2020",
+        "iurilli_2021"
+      ]
+    }
+  ],
+  "transfer_tasks": [
+    {
+      "id": "discharge_transfer_01",
+      "knowledge_type": "transfer",
+      "scenario": "Ein neuer Entladetest besitzt zwölf Diagnosezyklen statt neun.",
+      "question": "Wie sollte die Auswertung damit umgehen?",
+      "options": [
+        "Die zusätzlichen Zyklen ignorieren.",
+        "Die vorhandenen Zyklen dynamisch erkennen und alle gültigen Zyklen auswerten.",
+        "Die Datei kann nicht ausgewertet werden.",
+        "Die zusätzlichen Zyklen als EIS Fehler markieren."
+      ],
+      "correct_option": 1,
+      "explanation": "Die Analyse soll erkannte Ereignisse verwenden und nicht auf exakt neun Zyklen festgelegt sein.",
+      "source_ids": []
+    },
+    {
+      "id": "discharge_transfer_02",
+      "knowledge_type": "transfer",
+      "scenario": "Ein zukünftiges Modul besitzt nur eine einzige Zellspannungsmessung.",
+      "question": "Welche Kennzahl ist dann nicht sinnvoll?",
+      "options": [
+        "Entladekapazität",
+        "Entladeenergie",
+        "Zellspannungs Spread zwischen Zellen",
+        "Pulswiderstand"
+      ],
+      "correct_option": 2,
+      "explanation": "Bei einer Zelle existiert kein Unterschied zwischen höchster und niedrigster Zellspannung.",
+      "source_ids": []
+    },
+    {
+      "id": "eis_transfer_01",
+      "knowledge_type": "transfer",
+      "scenario": "Ein neuer EIS Datensatz enthält einen anderen Frequenzbereich und mehr Punkte pro Scan.",
+      "question": "Welche Vorgehensweise ist am sinnvollsten?",
+      "options": [
+        "Nur die bisherigen 50 Punkte verwenden.",
+        "Die tatsächlich vorhandenen Frequenzen und Punkte übernehmen und Nyquist/Bode dynamisch erzeugen.",
+        "Den Frequenzbereich auf 0,1 bis 5000 Hz erzwingen.",
+        "Nur noch den 1000-Hz-Punkt darstellen."
+      ],
+      "correct_option": 1,
+      "explanation": "Die Visualisierung soll sich an den tatsächlich vorhandenen Frequenzdaten orientieren.",
+      "source_ids": [
+        "meddings_2020"
+      ]
+    }
+  ],
+  "internal_sources": {
+    "camil_2021": {
+      "authors": "Makransky, G.; Petersen, G. B.",
+      "year": 2021,
+      "title": "The Cognitive Affective Model of Immersive Learning (CAMIL)",
+      "doi": "10.1007/s10648-020-09586-2"
+    },
+    "stroe_2016": {
+      "authors": "Stroe, D.-I.; Swierczynski, M.; Stroe, A.-I.; Kær, S. K.",
+      "year": 2016,
+      "title": "Generalized Characterization Methodology for Performance Modelling of Lithium-Ion Batteries",
+      "doi": "10.3390/batteries2040037"
+    },
+    "ma_2018": {
+      "authors": "Ma, S.; Jiang, M.; Tao, P.; Song, C.; Wu, J.; Wang, J.; Deng, T.; Shang, W.",
+      "year": 2018,
+      "title": "Temperature effect and thermal impact in lithium-ion batteries: A review",
+      "doi": "10.1016/j.pnsc.2018.11.002"
+    },
+    "meddings_2020": {
+      "authors": "Meddings, N. et al.",
+      "year": 2020,
+      "title": "Application of electrochemical impedance spectroscopy to commercial Li-ion cells: A review",
+      "doi": "10.1016/j.jpowsour.2020.228742"
+    },
+    "iurilli_2021": {
+      "authors": "Iurilli, P.; Brivio, C.; Wood, V.",
+      "year": 2021,
+      "title": "On the use of electrochemical impedance spectroscopy to characterize and model the aging phenomena of lithium-ion batteries: a critical review",
+      "doi": "10.1016/j.jpowsour.2021.229860"
+    },
+    "internal_eis_verification": {
+      "authors": "DiBaLa Bachelorarbeit",
+      "year": 2026,
+      "title": "Interne EIS Vorzeichen- und Skalenprüfung mit ACIR Referenzkanälen",
+      "type": "project_validation",
+      "note": "Zre/Zim stimmen bei 10, 100 und 1000 Hz numerisch und im Vorzeichen mit den ACIR Referenzkanälen überein."
+    }
+  }
+}
