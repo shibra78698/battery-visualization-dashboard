@@ -887,6 +887,96 @@ def load_ocv_comparison_learning():
     )
 
 
+# Discharge
+
+
+def load_discharge_index(
+    required=True,
+):
+    return load_index(
+        "discharge",
+        required=required,
+    )
+
+
+def get_discharge_test_ids():
+    return get_test_ids(
+        "discharge"
+    )
+
+
+def load_discharge_summary(
+    test_id,
+):
+    return load_test_summary(
+        "discharge",
+        test_id,
+    )
+
+
+def load_discharge_test(
+    test_id,
+    data_keys=None,
+):
+    return load_test_bundle(
+        "discharge",
+        test_id,
+        data_keys=data_keys,
+    )
+
+
+def load_discharge_temperature_comparison():
+    index = load_index(
+        "discharge",
+        required=False,
+    )
+
+    filename = index.get(
+        "comparison_file",
+        "temperature_comparison.csv",
+    )
+
+    path = (
+        collection_root(
+            "discharge"
+        )
+        / filename
+    )
+
+    if not path.exists():
+        return pd.DataFrame()
+
+    return read_csv(
+        path
+    )
+
+
+def load_discharge_comparison_learning():
+    index = load_index(
+        "discharge",
+        required=False,
+    )
+
+    filename = index.get(
+        "comparison_learning_file",
+        "comparison_learning_content.json",
+    )
+
+    path = (
+        collection_root(
+            "discharge"
+        )
+        / filename
+    )
+
+    if not path.exists():
+        return None
+
+    return read_json(
+        path
+    )
+
+
 # Overview
 
 

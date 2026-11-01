@@ -1,486 +1,331 @@
+import html
 import re
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-#from dashboard.data_loader import (load_capacity_data,capacity_export_path,select_capacity_test,)
-from data_loader import (load_capacity_data,capacity_export_path,select_capacity_test,)
+from data_loader import (
+    load_capacity_data,
+    capacity_export_path,
+    select_capacity_test,
+)
 
 
-def format_number(value, decimals=2):
-    if value is None or pd.isna(value):
+# ============================================================
+# CONSTANTS
+# ============================================================
+
+UNI_GREEN = "#6F9512"
+DARK_GREY = "#59636E"
+
+CELL_COLUMN_PATTERN = re.compile(
+    r"^cell_\d+_V$"
+)
+
+
+# ============================================================
+# BASIC HELPERS
+# ============================================================
+
+def safe_float(value):
+    if value is None:
+        return None
+
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return None
+
+    if not np.isfinite(value):
+        return None
+
+    return value
+
+
+def format_number(
+    value,
+    decimals=2,
+):
+    value = safe_float(
+        value
+    )
+
+    if value is None:
         return "–"
 
-    text = f"{value:,.{decimals}f}"
-    return text.replace(",", "X").replace(".", ",").replace("X", ".")
+    text = (
+        f"{value:,.{decimals}f}"
+    )
+
+    return (
+        text
+        .replace(",", "X")
+        .replace(".", ",")
+        .replace("X", ".")
+    )
 
 
-def get_system_name(number_of_cells):
+def metric_text(
+    value,
+    unit="",
+    decimals=2,
+):
+    number = format_number(
+        value,
+        decimals,
+    )
+
+    if number == "–":
+        return number
+
+    if unit:
+        return (
+            f"{number} {unit}"
+        )
+
+    return number
+
+
+def get_system_name(
+    number_of_cells,
+):
     if number_of_cells == 1:
         return "Einzelzelle"
 
     if number_of_cells > 1:
-        return f"{number_of_cells} Zellen Batteriemodul"
+        return (
+            f"{number_of_cells} "
+            f"Zellen Batteriemodul"
+        )
 
     return "Batteriesystem"
 
 
-def get_cell_columns(df):
+def get_cell_columns(
+    dataframe,
+):
+    if dataframe is None:
+        return []
+
     return sorted(
         column
-        for column in df.columns
-        if re.fullmatch(r"cell_\d+_V", column)
+        for column
+        in dataframe.columns
+        if CELL_COLUMN_PATTERN.fullmatch(
+            column
+        )
     )
 
 
-def cell_label(column):
+def cell_label(
+    column,
+):
     if not column:
         return "–"
 
-    match = re.search(r"cell_(\d+)_V", column)
+    match = re.search(
+        r"cell_(\d+)_V",
+        str(column),
+    )
 
     if not match:
-        return column
+        return str(column)
 
-    return f"Zelle {int(match.group(1))}"
-
-
-def get_extreme_cells(df, cell_columns):
-    minimum_values = df[cell_columns].min()
-
-    lowest_cell = minimum_values.idxmin()
-    highest_cell = minimum_values.idxmax()
-
-    return lowest_cell, highest_cell
+    return (
+        f"Zelle "
+        f"{int(match.group(1))}"
+    )
 
 
-def get_explanation(summary, group, key):
+def get_extreme_cells(
+    dataframe,
+    cell_columns,
+):
+    if (
+        dataframe is None
+        or dataframe.empty
+        or not cell_columns
+    ):
+        return None, None
+
+    minimum_values = (
+        dataframe[
+            cell_columns
+        ]
+        .min()
+    )
+
+    lowest_cell = (
+        minimum_values.idxmin()
+    )
+
+    highest_cell = (
+        minimum_values.idxmax()
+    )
+
+    return (
+        lowest_cell,
+        highest_cell,
+    )
+
+
+def get_kpi_explanation(
+    summary,
+    group,
+    key,
+):
     return (
         summary
-        .get("kpi_explanations", {})
-        .get(group, {})
-        .get(key)
-    )
-
-
-def electrical_plot(df):
-    figure = make_subplots(
-        specs=[[{"secondary_y": True}]]
-    )
-
-    time_h = df["timestamp_s"] / 3600
-
-    figure.add_trace(
-        go.Scatter(
-            x=time_h,
-            y=df["voltage_V"],
-            mode="lines",
-            name="Spannung",
-            hovertemplate=(
-                "Zeit: %{x:.2f} h<br>"
-                "Spannung: %{y:.3f} V"
-                "<extra></extra>"
-            ),
-        ),
-        secondary_y=False,
-    )
-
-    figure.add_trace(
-        go.Scatter(
-            x=time_h,
-            y=df["current_A"],
-            mode="lines",
-            name="Strom",
-            hovertemplate=(
-                "Zeit: %{x:.2f} h<br>"
-                "Strom: %{y:.2f} A"
-                "<extra></extra>"
-            ),
-        ),
-        secondary_y=True,
-    )
-
-    figure.update_layout(
-        title="Spannung und Strom über der Messzeit",
-        hovermode="x unified",
-        legend=dict(
-            orientation="h",
-            y=1.08,
-        ),
-        margin=dict(
-            l=20,
-            r=20,
-            t=80,
-            b=20,
-        ),
-    )
-
-    figure.update_xaxes(
-        title_text="Messzeit [h]"
-    )
-
-    figure.update_yaxes(
-        title_text="Spannung [V]",
-        secondary_y=False,
-    )
-
-    figure.update_yaxes(
-        title_text="Strom [A]",
-        secondary_y=True,
-    )
-
-    return figure
-
-
-def cell_voltage_plot(df, selected_cells, title):
-    figure = go.Figure()
-
-    time_h = (
-        df["timestamp_s"]
-        - df["timestamp_s"].min()
-    ) / 3600
-
-    for column in selected_cells:
-        figure.add_trace(
-            go.Scatter(
-                x=time_h,
-                y=df[column],
-                mode="lines",
-                name=cell_label(column),
-                hovertemplate=(
-                    "Zeit: %{x:.2f} h<br>"
-                    "Spannung: %{y:.4f} V"
-                    "<extra></extra>"
-                ),
-            )
+        .get(
+            "kpi_explanations",
+            {},
         )
-
-    figure.update_layout(
-        title=title,
-        xaxis_title="Zeit seit Beginn der Entladung [h]",
-        yaxis_title="Zellspannung [V]",
-        hovermode="x unified",
-        legend=dict(
-            orientation="h",
-            y=-0.2,
-        ),
-        margin=dict(
-            l=20,
-            r=20,
-            t=60,
-            b=80,
-        ),
+        .get(
+            group,
+            {},
+        )
+        .get(
+            key
+        )
     )
 
-    return figure
 
-
-def cell_spread_plot(df):
-    if "cell_spread_mV" in df.columns:
-        spread = df["cell_spread_mV"]
-
-    elif "cell_delta_V" in df.columns:
-        spread = df["cell_delta_V"] * 1000
-
-    else:
+def get_graph_explanation(
+    learning,
+    graph_id,
+):
+    if not learning:
         return None
 
-    time_h = (
-        df["timestamp_s"]
-        - df["timestamp_s"].min()
-    ) / 3600
-
-    figure = go.Figure()
-
-    figure.add_trace(
-        go.Scatter(
-            x=time_h,
-            y=spread,
-            mode="lines",
-            name="Zellspannungsdifferenz",
-            hovertemplate=(
-                "Zeit: %{x:.2f} h<br>"
-                "Differenz: %{y:.2f} mV"
-                "<extra></extra>"
-            ),
-        )
-    )
-
-    figure.update_layout(
-        title="Spannungsdifferenz zwischen den Zellen",
-        xaxis_title="Zeit seit Beginn der Entladung [h]",
-        yaxis_title="Zellspannungsdifferenz [mV]",
-        margin=dict(
-            l=20,
-            r=20,
-            t=60,
-            b=40,
-        ),
-    )
-
-    return figure
-
-
-def get_temperature_columns(df):
-    columns = []
-
-    for column in df.columns:
-        if column == "timestamp_s":
-            continue
-
-        name = column.lower()
-
-        if "temp" not in name and "temperature" not in name:
-            continue
-
-        derived_names = [
-            "spread",
-            "delta",
-            "mean",
-            "minimum",
-            "maximum",
-        ]
-
-        if any(word in name for word in derived_names):
-            continue
-
-        columns.append(column)
-
-    return columns
-
-
-def temperature_label(column):
-    name = column.lower()
-
-    if "climate" in name or "clima" in name:
-        return "Klimatemperatur"
-
-    match = re.search(r"(\d+)", column)
-
-    if match:
-        return f"Temperatur {int(match.group(1))}"
-
-    return column
-
-
-def temperature_plot(df):
-    figure = go.Figure()
-
-    time_h = (
-        df["timestamp_s"]
-        - df["timestamp_s"].min()
-    ) / 3600
-
-    for column in get_temperature_columns(df):
-        figure.add_trace(
-            go.Scatter(
-                x=time_h,
-                y=df[column],
-                mode="lines",
-                name=temperature_label(column),
-                hovertemplate=(
-                    "Zeit: %{x:.2f} h<br>"
-                    "Temperatur: %{y:.2f} °C"
-                    "<extra></extra>"
-                ),
-            )
-        )
-
-    figure.update_layout(
-        title="Temperaturverlauf während der Hauptentladung",
-        xaxis_title="Zeit seit Beginn der Entladung [h]",
-        yaxis_title="Temperatur [°C]",
-        hovermode="x unified",
-        legend=dict(
-            orientation="h",
-            y=1.08,
-        ),
-        margin=dict(
-            l=20,
-            r=20,
-            t=80,
-            b=40,
-        ),
-    )
-
-    return figure
-
-
-def show_quiz(quiz, test_id):
-    quiz_id = quiz["id"]
-    key_prefix = f"{test_id}_{quiz_id}"
-
-    with st.container(border=True):
-        difficulty = quiz.get("difficulty")
-
-        if difficulty:
-            st.caption(
-                f"Schwierigkeitsgrad: {difficulty.capitalize()}"
-            )
-
-        answer = st.radio(
-            quiz["question"],
-            quiz["options"],
-            index=None,
-            key=f"{key_prefix}_choice",
-        )
-
-        if st.button(
-            "Antwort prüfen",
-            key=f"{key_prefix}_button",
-        ):
-            if answer is None:
-                st.warning(
-                    "Bitte zuerst eine Antwort auswählen."
-                )
-            else:
-                st.session_state[
-                    f"{key_prefix}_submitted"
-                ] = answer
-
-        submitted = st.session_state.get(
-            f"{key_prefix}_submitted"
-        )
-
-        if submitted is None:
-            return
-
-        correct_answer = quiz["options"][
-            quiz["correct_index"]
-        ]
-
-        if submitted == correct_answer:
-            st.success("Richtig.")
-        else:
-            st.error(
-                f"Nicht ganz. Die richtige Antwort ist: "
-                f"{correct_answer}"
-            )
-
-        st.info(
-            f"Erklärung: {quiz['explanation']}"
-        )
-
-
-def show_reflection(question, index, test_id):
-    key_prefix = f"{test_id}_reflection_{index}"
-
-    with st.container(border=True):
-        st.markdown(
-            f"**{question['question']}**"
-        )
-
-        user_answer = st.text_area(
-            "Eigene Überlegung",
-            key=f"{key_prefix}_text",
-            height=120,
-            placeholder="Formuliere zuerst deine eigene Antwort...",
-        )
-
-        has_answer = bool(
-            user_answer
-            and user_answer.strip()
-        )
-
-        if not has_answer:
-            st.caption(
-                "Eine eigene Antwort ist erforderlich, "
-                "bevor die mögliche Antwort angezeigt werden kann."
-            )
-
-        if st.button(
-            "Mögliche Antwort anzeigen",
-            key=f"{key_prefix}_button",
-            disabled=not has_answer,
-        ):
-            st.session_state[
-                f"{key_prefix}_show"
-            ] = True
-
+    for item in learning.get(
+        "graph_explanations",
+        [],
+    ):
         if (
-            has_answer
-            and st.session_state.get(
-                f"{key_prefix}_show",
-                False,
-            )
+            item.get("id")
+            == graph_id
         ):
-            st.markdown(
-                "**Mögliche Antwort / Orientierung:**"
-            )
+            return item
 
-            st.info(
-                question["sample_answer"]
-            )
-
-            st.caption(
-                "Vergleiche diese mögliche Antwort mit deiner "
-                "eigenen Überlegung. Andere fachlich begründete "
-                "Antworten können ebenfalls sinnvoll sein."
-            )
+    return None
 
 
-def show_transfer_task(task, index, test_id):
-    key_prefix = f"{test_id}_transfer_{index}"
+def render_graph_explanation(
+    explanation,
+):
+    """
+    Same graph explanation style as OCV and Discharge:
+    one continuous flow text inside a rectangular box.
+    """
 
-    with st.container(border=True):
-        st.markdown(
-            f"**Transferaufgabe {index + 1}**"
+    if not explanation:
+        return
+
+    text_parts = []
+
+    for key in (
+        "what",
+        "focus",
+        "interpretation",
+    ):
+        value = explanation.get(
+            key
         )
 
-        st.write(
-            task["question"]
+        if value:
+            text_parts.append(
+                str(value).strip()
+            )
+
+    if not text_parts:
+        return
+
+    flow_text = " ".join(
+        text_parts
+    )
+
+    safe_text = html.escape(
+        flow_text
+    )
+
+    st.markdown(
+        (
+            '<div class="learn-box">'
+            '<div class="learn-box-title">'
+            'Einordnung'
+            '</div>'
+            '<div class="learn-box-text">'
+            f'{safe_text}'
+            '</div>'
+            '</div>'
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def section_selector(
+    options,
+    key,
+):
+    """
+    Only one major section is rendered at a time.
+    """
+
+    segmented_control = getattr(
+        st,
+        "segmented_control",
+        None,
+    )
+
+    if segmented_control is not None:
+        selected = segmented_control(
+            "Bereich",
+            options=options,
+            default=options[0],
+            key=key,
+            label_visibility="collapsed",
         )
 
-        user_answer = st.text_area(
-            "Eigene Antwort",
-            key=f"{key_prefix}_text",
-            height=130,
-            placeholder=(
-                "Übertrage das Gelernte auf die neue Situation "
-                "und begründe deine Antwort..."
-            ),
+        if selected is not None:
+            return selected
+
+    return st.radio(
+        "Bereich",
+        options=options,
+        horizontal=True,
+        key=key + "_fallback",
+        label_visibility="collapsed",
+    )
+
+
+def read_optional_export_csv(
+    filename,
+    test_id,
+):
+    """
+    Load additional analysis tables only when needed.
+
+    This keeps the normal Capacity page lightweight.
+    """
+
+    path = capacity_export_path(
+        filename,
+        test_id,
+    )
+
+    if not path.exists():
+        return None
+
+    try:
+        return pd.read_csv(
+            path
         )
 
-        has_answer = bool(
-            user_answer
-            and user_answer.strip()
-        )
-
-        if not has_answer:
-            st.caption(
-                "Bitte zuerst eine eigene Antwort formulieren."
-            )
-
-        if st.button(
-            "Beispielantwort anzeigen",
-            key=f"{key_prefix}_button",
-            disabled=not has_answer,
-        ):
-            st.session_state[
-                f"{key_prefix}_show"
-            ] = True
-
-        if (
-            has_answer
-            and st.session_state.get(
-                f"{key_prefix}_show",
-                False,
-            )
-        ):
-            st.markdown(
-                "**Beispielhafte Lösung:**"
-            )
-
-            st.info(
-                task["sample_answer"]
-            )
-
-            st.caption(
-                "Die Beispielantwort stellt nicht zwingend "
-                "die einzige mögliche Lösung dar."
-            )
+    except Exception:
+        return None
 
 
 def show_download_button(
@@ -495,9 +340,6 @@ def show_download_button(
     )
 
     if not path.exists():
-        st.warning(
-            f"{filename} wurde nicht gefunden."
-        )
         return
 
     st.download_button(
@@ -505,140 +347,1139 @@ def show_download_button(
         data=path.read_bytes(),
         file_name=filename,
         mime=mime_type,
+        use_container_width=True,
     )
 
 
-selected_test = select_capacity_test()
+# ============================================================
+# PLOT:
+# VOLTAGE + CURRENT
+# ============================================================
+
+def electrical_plot(
+    dataframe,
+):
+    figure = make_subplots(
+        specs=[
+            [
+                {
+                    "secondary_y":
+                        True
+                }
+            ]
+        ]
+    )
+
+    time_h = (
+        dataframe[
+            "timestamp_s"
+        ]
+        /
+        3600.0
+    )
+
+    if (
+        "phase"
+        in dataframe.columns
+    ):
+        phase_values = (
+            dataframe[
+                "phase"
+            ]
+            .astype(str)
+            .to_numpy()
+        )
+
+    else:
+        phase_values = np.array(
+            ["–"] * len(dataframe)
+        )
+
+    customdata = np.column_stack(
+        [
+            phase_values,
+        ]
+    )
+
+    figure.add_trace(
+        go.Scatter(
+            x=time_h,
+            y=dataframe[
+                "voltage_V"
+            ],
+            mode="lines",
+            name="Spannung",
+            line=dict(
+                color=UNI_GREEN,
+                width=2,
+            ),
+            customdata=customdata,
+            hovertemplate=(
+                "Zeit: %{x:.2f} h"
+                "<br>"
+                "Spannung: %{y:.3f} V"
+                "<br>"
+                "Phase: %{customdata[0]}"
+                "<extra></extra>"
+            ),
+        ),
+        secondary_y=False,
+    )
+
+    figure.add_trace(
+        go.Scatter(
+            x=time_h,
+            y=dataframe[
+                "current_A"
+            ],
+            mode="lines",
+            name="Strom",
+            line=dict(
+                color=DARK_GREY,
+                width=1.4,
+            ),
+            customdata=customdata,
+            hovertemplate=(
+                "Zeit: %{x:.2f} h"
+                "<br>"
+                "Strom: %{y:.2f} A"
+                "<br>"
+                "Phase: %{customdata[0]}"
+                "<extra></extra>"
+            ),
+        ),
+        secondary_y=True,
+    )
+
+    figure.update_xaxes(
+        title_text=(
+            "Messzeit [h]"
+        )
+    )
+
+    figure.update_yaxes(
+        title_text=(
+            "Spannung [V]"
+        ),
+        secondary_y=False,
+    )
+
+    figure.update_yaxes(
+        title_text=(
+            "Strom [A]"
+        ),
+        secondary_y=True,
+    )
+
+    figure.update_layout(
+        height=470,
+        margin=dict(
+            l=25,
+            r=25,
+            t=40,
+            b=30,
+        ),
+        legend=dict(
+            orientation="h",
+            y=1.08,
+        ),
+        hovermode="closest",
+    )
+
+    return figure
+
+
+# ============================================================
+# PLOT:
+# CELL VOLTAGES
+# ============================================================
+
+def cell_voltage_plot(
+    dataframe,
+    selected_cells,
+):
+    figure = go.Figure()
+
+    time_h = (
+        dataframe[
+            "timestamp_s"
+        ]
+        -
+        dataframe[
+            "timestamp_s"
+        ].min()
+    ) / 3600.0
+
+    for column in selected_cells:
+        figure.add_trace(
+            go.Scatter(
+                x=time_h,
+                y=dataframe[
+                    column
+                ],
+                mode="lines",
+                name=cell_label(
+                    column
+                ),
+                hovertemplate=(
+                    "Zeit: %{x:.2f} h"
+                    "<br>"
+                    "Spannung: %{y:.4f} V"
+                    "<extra></extra>"
+                ),
+            )
+        )
+
+    figure.update_layout(
+        height=460,
+        margin=dict(
+            l=25,
+            r=25,
+            t=40,
+            b=50,
+        ),
+        xaxis_title=(
+            "Zeit seit Beginn der "
+            "Hauptentladung [h]"
+        ),
+        yaxis_title=(
+            "Zellspannung [V]"
+        ),
+        legend=dict(
+            orientation="h",
+            y=-0.20,
+        ),
+        hovermode="closest",
+    )
+
+    return figure
+
+
+# ============================================================
+# PLOT:
+# CELL SPREAD
+# ============================================================
+
+def cell_spread_plot(
+    dataframe,
+):
+    if (
+        "cell_spread_mV"
+        in dataframe.columns
+    ):
+        spread = dataframe[
+            "cell_spread_mV"
+        ]
+
+    elif (
+        "cell_delta_V"
+        in dataframe.columns
+    ):
+        spread = (
+            dataframe[
+                "cell_delta_V"
+            ]
+            *
+            1000.0
+        )
+
+    else:
+        return None
+
+    time_h = (
+        dataframe[
+            "timestamp_s"
+        ]
+        -
+        dataframe[
+            "timestamp_s"
+        ].min()
+    ) / 3600.0
+
+    figure = go.Figure()
+
+    figure.add_trace(
+        go.Scatter(
+            x=time_h,
+            y=spread,
+            mode="lines",
+            line=dict(
+                color=UNI_GREEN,
+                width=2,
+            ),
+            name=(
+                "Zellspannungsdifferenz"
+            ),
+            hovertemplate=(
+                "Zeit: %{x:.2f} h"
+                "<br>"
+                "Differenz: %{y:.2f} mV"
+                "<extra></extra>"
+            ),
+        )
+    )
+
+    figure.update_layout(
+        height=390,
+        margin=dict(
+            l=25,
+            r=25,
+            t=30,
+            b=35,
+        ),
+        xaxis_title=(
+            "Zeit seit Beginn der "
+            "Hauptentladung [h]"
+        ),
+        yaxis_title=(
+            "Zellspannungsdifferenz [mV]"
+        ),
+        showlegend=False,
+    )
+
+    return figure
+
+
+# ============================================================
+# PLOT:
+# TEMPERATURE
+# ============================================================
+
+def get_temperature_columns(
+    dataframe,
+):
+    if dataframe is None:
+        return []
+
+    columns = []
+
+    for column in dataframe.columns:
+        if column == "timestamp_s":
+            continue
+
+        name = column.lower()
+
+        if (
+            "temp"
+            not in name
+            and
+            "temperature"
+            not in name
+        ):
+            continue
+
+        derived_names = [
+            "spread",
+            "delta",
+            "mean",
+            "minimum",
+            "maximum",
+            "start",
+            "end",
+        ]
+
+        if any(
+            word in name
+            for word in derived_names
+        ):
+            continue
+
+        columns.append(
+            column
+        )
+
+    return columns
+
+
+def temperature_label(
+    column,
+):
+    name = column.lower()
+
+    if (
+        "climate"
+        in name
+        or
+        "clima"
+        in name
+    ):
+        return "Klimatemperatur"
+
+    match = re.search(
+        r"(\d+)",
+        column,
+    )
+
+    if match:
+        return (
+            f"Temperatur "
+            f"{int(match.group(1))}"
+        )
+
+    return column
+
+
+def temperature_plot(
+    dataframe,
+):
+    figure = go.Figure()
+
+    time_h = (
+        dataframe[
+            "timestamp_s"
+        ]
+        -
+        dataframe[
+            "timestamp_s"
+        ].min()
+    ) / 3600.0
+
+    for column in get_temperature_columns(
+        dataframe
+    ):
+        figure.add_trace(
+            go.Scatter(
+                x=time_h,
+                y=dataframe[
+                    column
+                ],
+                mode="lines",
+                name=temperature_label(
+                    column
+                ),
+                hovertemplate=(
+                    "Zeit: %{x:.2f} h"
+                    "<br>"
+                    "Temperatur: %{y:.2f} °C"
+                    "<extra></extra>"
+                ),
+            )
+        )
+
+    figure.update_layout(
+        height=440,
+        margin=dict(
+            l=25,
+            r=25,
+            t=40,
+            b=35,
+        ),
+        xaxis_title=(
+            "Zeit seit Beginn der "
+            "Hauptentladung [h]"
+        ),
+        yaxis_title=(
+            "Temperatur [°C]"
+        ),
+        legend=dict(
+            orientation="h",
+            y=1.08,
+        ),
+        hovermode="closest",
+    )
+
+    return figure
+
+
+# ============================================================
+# FAST LEARNING:
+# QUIZ
+# ============================================================
+
+def render_quiz(
+    quiz,
+    test_id,
+):
+    quiz_id = quiz.get(
+        "id",
+        "quiz",
+    )
+
+    key_base = (
+        f"{test_id}_{quiz_id}"
+    )
+
+    options = quiz.get(
+        "options",
+        [],
+    )
+
+    difficulty = quiz.get(
+        "difficulty"
+    )
+
+    with st.form(
+        key=key_base + "_form",
+        clear_on_submit=False,
+    ):
+        if difficulty:
+            st.caption(
+                "Schwierigkeitsgrad: "
+                + difficulty.capitalize()
+            )
+
+        st.markdown(
+            "**"
+            + quiz.get(
+                "question",
+                "",
+            )
+            + "**"
+        )
+
+        selected = st.radio(
+            "Antwort",
+            options=options,
+            index=None,
+            key=(
+                key_base
+                + "_answer"
+            ),
+            label_visibility="collapsed",
+        )
+
+        submitted = (
+            st.form_submit_button(
+                "Antwort prüfen"
+            )
+        )
+
+    if submitted:
+        if selected is None:
+            st.session_state[
+                key_base
+                + "_result"
+            ] = (
+                "warning",
+                (
+                    "Bitte zuerst eine "
+                    "Antwort auswählen."
+                ),
+                None,
+            )
+
+        else:
+            correct_index = quiz.get(
+                "correct_index"
+            )
+
+            selected_index = (
+                options.index(
+                    selected
+                )
+            )
+
+            is_correct = (
+                selected_index
+                ==
+                correct_index
+            )
+
+            correct_answer = None
+
+            if (
+                correct_index is not None
+                and
+                0
+                <= correct_index
+                < len(options)
+            ):
+                correct_answer = (
+                    options[
+                        correct_index
+                    ]
+                )
+
+            if is_correct:
+                message = (
+                    "Richtig."
+                )
+
+            else:
+                message = (
+                    "Noch nicht ganz."
+                )
+
+                if correct_answer:
+                    message += (
+                        " Die richtige "
+                        "Antwort ist: "
+                        + str(
+                            correct_answer
+                        )
+                    )
+
+            st.session_state[
+                key_base
+                + "_result"
+            ] = (
+                (
+                    "success"
+                    if is_correct
+                    else "error"
+                ),
+                message,
+                quiz.get(
+                    "explanation"
+                ),
+            )
+
+    result = st.session_state.get(
+        key_base
+        + "_result"
+    )
+
+    if result:
+        (
+            kind,
+            message,
+            explanation,
+        ) = result
+
+        if kind == "success":
+            st.success(
+                message
+            )
+
+        elif kind == "error":
+            st.error(
+                message
+            )
+
+        else:
+            st.warning(
+                message
+            )
+
+        if explanation:
+            st.info(
+                explanation
+            )
+
+
+# ============================================================
+# FAST LEARNING:
+# REFLECTION
+# ============================================================
+
+def render_reflection(
+    question,
+    test_id,
+):
+    question_id = question.get(
+        "id",
+        "reflection",
+    )
+
+    key_base = (
+        f"{test_id}_{question_id}"
+    )
+
+    minimum = int(
+        question.get(
+            "minimum_input_characters",
+            0,
+        )
+        or 0
+    )
+
+    with st.form(
+        key=key_base + "_form",
+        clear_on_submit=False,
+    ):
+        answer = st.text_area(
+            question.get(
+                "question",
+                "",
+            ),
+            key=(
+                key_base
+                + "_text"
+            ),
+            height=120,
+            placeholder=(
+                "Formuliere zuerst "
+                "deine eigene Antwort ..."
+            ),
+        )
+
+        submitted = (
+            st.form_submit_button(
+                "Musterantwort anzeigen"
+            )
+        )
+
+    if submitted:
+        if (
+            len(
+                answer.strip()
+            )
+            <
+            minimum
+        ):
+            st.session_state[
+                key_base
+                + "_revealed"
+            ] = False
+
+            st.warning(
+                "Bitte zuerst eine ausreichend "
+                "ausführliche eigene Antwort "
+                "formulieren."
+            )
+
+        else:
+            st.session_state[
+                key_base
+                + "_revealed"
+            ] = True
+
+    if st.session_state.get(
+        key_base
+        + "_revealed",
+        False,
+    ):
+        st.markdown(
+            "**Mögliche Antwort**"
+        )
+
+        st.info(
+            question.get(
+                "sample_answer",
+                "",
+            )
+        )
+
+        st.caption(
+            "Vergleiche diese Orientierung "
+            "mit deiner eigenen Antwort. "
+            "Andere fachlich begründete "
+            "Antworten können ebenfalls "
+            "sinnvoll sein."
+        )
+
+
+# ============================================================
+# FAST LEARNING:
+# TRANSFER
+# ============================================================
+
+def render_transfer_task(
+    task,
+    test_id,
+):
+    task_id = task.get(
+        "id",
+        "transfer",
+    )
+
+    key_base = (
+        f"{test_id}_{task_id}"
+    )
+
+    minimum = int(
+        task.get(
+            "minimum_input_characters",
+            0,
+        )
+        or 0
+    )
+
+    with st.form(
+        key=key_base + "_form",
+        clear_on_submit=False,
+    ):
+        answer = st.text_area(
+            task.get(
+                "question",
+                "",
+            ),
+            key=(
+                key_base
+                + "_text"
+            ),
+            height=130,
+            placeholder=(
+                "Übertrage das Gelernte "
+                "auf die neue Situation "
+                "und begründe deine Antwort ..."
+            ),
+        )
+
+        submitted = (
+            st.form_submit_button(
+                "Beispielantwort anzeigen"
+            )
+        )
+
+    if submitted:
+        if (
+            len(
+                answer.strip()
+            )
+            <
+            minimum
+        ):
+            st.session_state[
+                key_base
+                + "_revealed"
+            ] = False
+
+            st.warning(
+                "Bitte zuerst eine ausreichend "
+                "ausführliche eigene Antwort "
+                "formulieren."
+            )
+
+        else:
+            st.session_state[
+                key_base
+                + "_revealed"
+            ] = True
+
+    if st.session_state.get(
+        key_base
+        + "_revealed",
+        False,
+    ):
+        st.markdown(
+            "**Beispielhafte Lösung**"
+        )
+
+        st.info(
+            task.get(
+                "sample_answer",
+                "",
+            )
+        )
+
+        st.caption(
+            "Die Beispielantwort stellt "
+            "nicht zwingend die einzige "
+            "fachlich sinnvolle Lösung dar."
+        )
+
+
+# ============================================================
+# SELECT CAPACITY TEST
+# ============================================================
+
+selected_test = (
+    select_capacity_test()
+)
+
+
+if selected_test is None:
+    st.title(
+        "Kapazitätstest"
+    )
+
+    st.warning(
+        "Es sind noch keine exportierten "
+        "Kapazitätsdaten verfügbar."
+    )
+
+    st.stop()
+
+
+# ============================================================
+# LOAD DATA
+# ============================================================
 
 data = load_capacity_data(
     selected_test
 )
 
-summary = data["summary"]
-electrical = data["electrical"]
-cells = data["cells"]
-temperature = data["temperature"]
-events = data["events"]
-learning = data["learning"]
-manifest = data.get("manifest", {})
 
-cell_columns = get_cell_columns(
-    cells
+summary = data[
+    "summary"
+]
+
+electrical = data.get(
+    "electrical"
 )
+
+cells = data.get(
+    "cells"
+)
+
+temperature = data.get(
+    "temperature"
+)
+
+events = data.get(
+    "events"
+)
+
+learning = (
+    data.get(
+        "learning"
+    )
+    or {}
+)
+
+manifest = (
+    data.get(
+        "manifest"
+    )
+    or {}
+)
+
+
+cell_columns = (
+    get_cell_columns(
+        cells
+    )
+)
+
 
 number_of_cells = (
     summary
-    .get("module", {})
-    .get("number_of_cells", len(cell_columns))
+    .get(
+        "module",
+        {},
+    )
+    .get(
+        "number_of_cells",
+        len(
+            cell_columns
+        ),
+    )
 )
 
-if cell_columns and number_of_cells != len(cell_columns):
-    number_of_cells = len(cell_columns)
 
-system_name = get_system_name(
+try:
+    number_of_cells = int(
+        number_of_cells
+        or 0
+    )
+
+except (
+    TypeError,
+    ValueError,
+):
+    number_of_cells = len(
+        cell_columns
+    )
+
+
+if (
+    cell_columns
+    and
     number_of_cells
+    !=
+    len(cell_columns)
+):
+    number_of_cells = len(
+        cell_columns
+    )
+
+
+system_name = (
+    get_system_name(
+        number_of_cells
+    )
 )
+
 
 source_file = summary.get(
     "source_file"
 )
 
 
+capacity_summary = summary.get(
+    "capacity",
+    {},
+)
+
+energy_summary = summary.get(
+    "energy",
+    {},
+)
+
+electrical_summary = summary.get(
+    "electrical",
+    {},
+)
+
+cell_summary = summary.get(
+    "cells",
+    {},
+)
+
+temperature_summary = summary.get(
+    "temperature",
+    {},
+)
+
+validation_summary = summary.get(
+    "validation",
+    {},
+)
+
+
+# ============================================================
+# HEADER
+# ============================================================
+
+st.title(
+    "Kapazitätstest"
+)
+
+
+st.write(
+    "Elektrische, zellbezogene und "
+    "thermische Analyse des Kapazitätstests "
+    "mit didaktischer Aufbereitung der "
+    "berechneten Ergebnisse."
+)
+
+
+metadata_text = (
+    system_name
+)
+
+
+if source_file:
+    metadata_text += (
+        " · "
+        + str(
+            source_file
+        )
+    )
+
+
+st.caption(
+    metadata_text
+)
+
+
 st.markdown(
-    f"""
-    <div class="dashboard-header">
-        <h1>Kapazitätstest</h1>
-        <p>
-            Elektrische, zellbezogene und thermische Analyse:
-            {system_name}
-        </p>
+    """
+    <div class="green-note">
+        Die analytischen Kennwerte werden vor dem Dashboard
+        aus den vollständigen Messdaten berechnet. Die für
+        die Darstellung exportierten Zeitreihen können
+        reduziert sein, ohne die KPI-Berechnung zu verändern.
+        Lade- und Entladeereignisse werden ereignisbasiert
+        getrennt ausgewertet.
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-if source_file:
-    st.caption(
-        f"Aktuelle Messdatei: {source_file}"
+
+# ============================================================
+# CENTRAL KPIs
+# ============================================================
+
+discharge_capacity = (
+    capacity_summary.get(
+        "discharge_Ah"
+    )
+)
+
+
+discharge_energy_Wh = (
+    energy_summary.get(
+        "discharge_Wh"
+    )
+)
+
+
+discharge_energy_kWh = None
+
+
+if (
+    safe_float(
+        discharge_energy_Wh
+    )
+    is not None
+):
+    discharge_energy_kWh = (
+        float(
+            discharge_energy_Wh
+        )
+        /
+        1000.0
     )
 
 
-view_mode = st.radio(
-    "Ansicht",
-    [
-        "Lernmodus",
-        "Erweiterte Analyse",
-    ],
-    horizontal=True,
-    key=f"{selected_test}_view_mode",
+energy_efficiency = (
+    energy_summary.get(
+        "efficiency_pct"
+    )
 )
 
 
-st.subheader(
-    "Zentrale Ergebnisse"
+max_temperature = (
+    temperature_summary.get(
+        "maximum_C"
+    )
 )
 
-discharge_capacity = summary[
-    "capacity"
-]["discharge_Ah"]
 
-discharge_energy_kwh = (
-    summary["energy"]["discharge_Wh"]
-    / 1000
+k1, k2, k3, k4, k5 = (
+    st.columns(5)
 )
-
-energy_efficiency = summary[
-    "energy"
-]["efficiency_pct"]
-
-max_temperature = summary[
-    "temperature"
-]["maximum_C"]
-
-
-k1, k2, k3, k4, k5 = st.columns(5)
 
 
 with k1:
     st.metric(
         "Entladekapazität",
-        f"{format_number(discharge_capacity, 2)} Ah",
+        metric_text(
+            discharge_capacity,
+            "Ah",
+            2,
+        ),
     )
 
 
 with k2:
     st.metric(
         "Entladeenergie",
-        f"{format_number(discharge_energy_kwh, 2)} kWh",
+        metric_text(
+            discharge_energy_kWh,
+            "kWh",
+            2,
+        ),
     )
 
 
 with k3:
     st.metric(
         "Energieeffizienz",
-        f"{format_number(energy_efficiency, 2)} %",
+        metric_text(
+            energy_efficiency,
+            "%",
+            2,
+        ),
     )
 
 
 with k4:
     if number_of_cells > 1:
-        max_cell_spread = summary[
-            "cells"
-        ]["maximum_spread_mV"]
-
         st.metric(
             "Max. Zellspannungsdifferenz",
-            f"{format_number(max_cell_spread, 2)} mV",
+            metric_text(
+                cell_summary.get(
+                    "maximum_spread_mV"
+                ),
+                "mV",
+                2,
+            ),
         )
 
     elif number_of_cells == 1:
-        min_cell_voltage = summary[
-            "cells"
-        ]["weakest_cell_voltage_V"]
-
         st.metric(
             "Minimale Zellspannung",
-            f"{format_number(min_cell_voltage, 4)} V",
+            metric_text(
+                cell_summary.get(
+                    "weakest_cell_voltage_V"
+                ),
+                "V",
+                4,
+            ),
         )
 
     else:
@@ -651,33 +1492,46 @@ with k4:
 with k5:
     st.metric(
         "Maximale Temperatur",
-        f"{format_number(max_temperature, 2)} °C",
+        metric_text(
+            max_temperature,
+            "°C",
+            2,
+        ),
     )
 
+
+# ============================================================
+# KPI EXPLANATIONS
+# ============================================================
 
 with st.expander(
     "Was bedeuten diese Kennwerte?"
 ):
-    explanations = [
+    explanation_items = [
         (
             "Entladekapazität",
-            get_explanation(
+
+            get_kpi_explanation(
                 summary,
                 "capacity",
                 "discharge_Ah",
             ),
         ),
+
         (
             "Entladeenergie",
-            get_explanation(
+
+            get_kpi_explanation(
                 summary,
                 "energy",
                 "discharge_Wh",
             ),
         ),
+
         (
             "Energieeffizienz",
-            get_explanation(
+
+            get_kpi_explanation(
                 summary,
                 "energy",
                 "efficiency_pct",
@@ -685,11 +1539,14 @@ with st.expander(
         ),
     ]
 
+
     if number_of_cells > 1:
-        explanations.append(
+        explanation_items.append(
             (
-                "Maximale Zellspannungsdifferenz",
-                get_explanation(
+                "Maximale "
+                "Zellspannungsdifferenz",
+
+                get_kpi_explanation(
                     summary,
                     "cells",
                     "maximum_spread_mV",
@@ -697,11 +1554,13 @@ with st.expander(
             )
         )
 
+
     elif number_of_cells == 1:
-        explanations.append(
+        explanation_items.append(
             (
                 "Minimale Zellspannung",
-                get_explanation(
+
+                get_kpi_explanation(
                     summary,
                     "cells",
                     "weakest_cell_voltage_V",
@@ -709,10 +1568,12 @@ with st.expander(
             )
         )
 
-    explanations.append(
+
+    explanation_items.append(
         (
             "Maximale Temperatur",
-            get_explanation(
+
+            get_kpi_explanation(
                 summary,
                 "temperature",
                 "maximum_C",
@@ -720,96 +1581,192 @@ with st.expander(
         )
     )
 
-    for title, explanation in explanations:
-        if explanation:
-            st.markdown(
-                f"**{title}**"
-            )
 
-            st.write(
-                explanation
-            )
+    for (
+        title,
+        explanation,
+    ) in explanation_items:
+
+        if not explanation:
+            continue
+
+        st.markdown(
+            "**"
+            + title
+            + "**"
+        )
+
+        st.write(
+            explanation
+        )
 
 
 st.divider()
 
 
-electrical_tab, cells_tab, temperature_tab, validation_tab = st.tabs(
+# ============================================================
+# MAIN NAVIGATION
+# ============================================================
+
+section = section_selector(
     [
-        "Elektrisches Verhalten",
-        "Zellverhalten",
-        "Thermisches Verhalten",
-        "Validierung",
-    ]
+        "Versuchsverlauf",
+        "Zellen",
+        "Temperatur",
+        "Lernen",
+        "Analyse",
+    ],
+
+    key=(
+        selected_test
+        + "_capacity_main_section"
+    ),
 )
 
 
-with electrical_tab:
-    st.plotly_chart(
-        electrical_plot(electrical),
-        use_container_width=True,
+st.divider()
+
+
+# ============================================================
+# SECTION:
+# VERSUCHSVERLAUF
+# ============================================================
+
+if section == "Versuchsverlauf":
+
+    st.subheader(
+        "Elektrischer Versuchsverlauf"
     )
 
-    min_voltage = summary[
-        "electrical"
-    ]["minimum_module_voltage_V"]
 
-    mean_discharge_current = summary[
-        "electrical"
-    ]["mean_discharge_current_A"]
+    e1, e2, e3 = (
+        st.columns(3)
+    )
 
-    mean_charge_current = summary[
-        "electrical"
-    ]["mean_charge_current_A"]
 
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
+    with e1:
         st.metric(
             "Min. Systemspannung",
-            f"{format_number(min_voltage, 3)} V",
+
+            metric_text(
+                electrical_summary.get(
+                    "minimum_module_voltage_V"
+                ),
+                "V",
+                3,
+            ),
         )
 
-    with c2:
+
+    with e2:
         st.metric(
             "Mittlerer Entladestrom",
-            f"{format_number(mean_discharge_current, 2)} A",
+
+            metric_text(
+                electrical_summary.get(
+                    "mean_discharge_current_A"
+                ),
+                "A",
+                2,
+            ),
         )
 
-    with c3:
+
+    with e3:
         st.metric(
             "Mittlerer Ladestrom",
-            f"{format_number(mean_charge_current, 2)} A",
+
+            metric_text(
+                electrical_summary.get(
+                    "mean_charge_current_A"
+                ),
+                "A",
+                2,
+            ),
         )
+
+
+    if (
+        electrical is None
+        or
+        electrical.empty
+    ):
+        st.warning(
+            "Keine elektrischen "
+            "Visualisierungsdaten verfügbar."
+        )
+
+
+    else:
+        graph_col, info_col = (
+            st.columns(
+                [
+                    4,
+                    1.3,
+                ]
+            )
+        )
+
+
+        with graph_col:
+            st.plotly_chart(
+                electrical_plot(
+                    electrical
+                ),
+                use_container_width=True,
+            )
+
+
+        with info_col:
+            render_graph_explanation(
+                get_graph_explanation(
+                    learning,
+                    "voltage_current_time",
+                )
+            )
+
 
     with st.expander(
         "Elektrische Kennwerte verstehen"
     ):
+
         entries = [
             (
                 "Minimale Systemspannung",
                 "minimum_module_voltage_V",
             ),
+
             (
                 "Mittlerer Entladestrom",
                 "mean_discharge_current_A",
             ),
+
             (
                 "Mittlerer Ladestrom",
                 "mean_charge_current_A",
             ),
         ]
 
-        for title, key in entries:
-            explanation = get_explanation(
-                summary,
-                "electrical",
-                key,
+
+        for (
+            title,
+            key,
+        ) in entries:
+
+            explanation = (
+                get_kpi_explanation(
+                    summary,
+                    "electrical",
+                    key,
+                )
             )
+
 
             if explanation:
                 st.markdown(
-                    f"**{title}**"
+                    "**"
+                    + title
+                    + "**"
                 )
 
                 st.write(
@@ -817,207 +1774,403 @@ with electrical_tab:
                 )
 
 
-with cells_tab:
-    if not cell_columns:
-        st.warning(
+# ============================================================
+# SECTION:
+# ZELLEN
+# ============================================================
+
+elif section == "Zellen":
+
+    st.subheader(
+        "Zellverhalten"
+    )
+
+
+    if (
+        cells is None
+        or
+        cells.empty
+        or
+        not cell_columns
+    ):
+        st.info(
             "Für diese Messung stehen keine "
             "Einzelzellspannungen zur Verfügung."
         )
 
+
     elif number_of_cells == 1:
-        single_cell = cell_columns[0]
 
-        st.subheader(
-            "Zellspannung"
+        single_cell = (
+            cell_columns[0]
         )
 
-        st.plotly_chart(
-            cell_voltage_plot(
-                cells,
-                [single_cell],
-                "Zellspannung während der Hauptentladung",
-            ),
-            use_container_width=True,
+
+        c1, c2 = (
+            st.columns(2)
         )
 
-        minimum_voltage = cells[
-            single_cell
-        ].min()
-
-        maximum_voltage = cells[
-            single_cell
-        ].max()
-
-        c1, c2 = st.columns(2)
 
         with c1:
             st.metric(
                 "Minimale Zellspannung",
-                f"{format_number(minimum_voltage, 4)} V",
+
+                metric_text(
+                    cells[
+                        single_cell
+                    ].min(),
+                    "V",
+                    4,
+                ),
             )
+
 
         with c2:
             st.metric(
                 "Maximale Zellspannung",
-                f"{format_number(maximum_voltage, 4)} V",
+
+                metric_text(
+                    cells[
+                        single_cell
+                    ].max(),
+                    "V",
+                    4,
+                ),
             )
 
-        st.info(
-            "Da nur eine Einzelzelle untersucht wird, "
-            "sind Kennwerte zum Vergleich mehrerer Zellen "
-            "wie die Zellspannungsdifferenz oder die "
-            "Zelle mit der niedrigsten Spannung nicht relevant."
-        )
 
-    else:
-        st.subheader(
-            "Zellspannungsvergleich"
-        )
-
-        lowest_cell, highest_cell = get_extreme_cells(
-            cells,
-            cell_columns,
-        )
-
-        display_mode = st.radio(
-            "Darstellung",
-            [
-                "Alle Zellen",
-                "Ausgewählte Zellen",
-                "Niedrigste und höchste Zelle",
-            ],
-            horizontal=True,
-            key=f"{selected_test}_cell_display_mode",
-        )
-
-        if display_mode == "Alle Zellen":
-            selected_cells = cell_columns
-
-        elif display_mode == "Ausgewählte Zellen":
-            labels = [
-                cell_label(column)
-                for column in cell_columns
-            ]
-
-            selected_labels = st.multiselect(
-                "Zellen auswählen",
-                options=labels,
-                default=[
-                    cell_label(lowest_cell)
-                ],
-                key=f"{selected_test}_cell_selection",
+        graph_col, info_col = (
+            st.columns(
+                [
+                    4,
+                    1.3,
+                ]
             )
+        )
 
-            selected_cells = [
-                column
-                for column in cell_columns
-                if cell_label(column) in selected_labels
-            ]
 
-        else:
-            selected_cells = list(
-                dict.fromkeys(
-                    [
-                        lowest_cell,
-                        highest_cell,
-                    ]
-                )
-            )
-
-            st.caption(
-                "Die Auswahl basiert auf den minimalen "
-                "Zellspannungen während der Hauptentladung."
-            )
-
-        if selected_cells:
+        with graph_col:
             st.plotly_chart(
                 cell_voltage_plot(
                     cells,
-                    selected_cells,
-                    "Zellspannungen während der Hauptentladung",
+                    [
+                        single_cell
+                    ],
                 ),
                 use_container_width=True,
             )
 
-        else:
-            st.info(
-                "Bitte mindestens eine Zelle auswählen."
+
+        with info_col:
+            render_graph_explanation(
+                get_graph_explanation(
+                    learning,
+                    "cell_voltages",
+                )
             )
 
-        weakest_cell = summary[
-            "cells"
-        ]["weakest_cell"]
 
-        weakest_voltage = summary[
-            "cells"
-        ]["weakest_cell_voltage_V"]
+        st.info(
+            "Bei einer Einzelzelle sind "
+            "Mehrzellenkennwerte wie die "
+            "Zellspannungsdifferenz nicht definiert."
+        )
 
-        max_spread = summary[
-            "cells"
-        ]["maximum_spread_mV"]
 
-        c1, c2, c3 = st.columns(3)
+    else:
+
+        lowest_cell, highest_cell = (
+            get_extreme_cells(
+                cells,
+                cell_columns,
+            )
+        )
+
+
+        display_mode = (
+            section_selector(
+                [
+                    "Alle Zellen",
+                    "Ausgewählte Zellen",
+                    "Extremzellen",
+                ],
+
+                key=(
+                    selected_test
+                    + "_cell_display_mode"
+                ),
+            )
+        )
+
+
+        if (
+            display_mode
+            ==
+            "Alle Zellen"
+        ):
+            selected_cells = (
+                cell_columns
+            )
+
+
+        elif (
+            display_mode
+            ==
+            "Ausgewählte Zellen"
+        ):
+
+            labels = {
+                cell_label(
+                    column
+                ):
+                    column
+
+                for column
+                in cell_columns
+            }
+
+
+            default_label = (
+                cell_label(
+                    lowest_cell
+                )
+                if lowest_cell
+                else None
+            )
+
+
+            selected_labels = (
+                st.multiselect(
+                    "Zellen auswählen",
+
+                    options=list(
+                        labels.keys()
+                    ),
+
+                    default=(
+                        [
+                            default_label
+                        ]
+                        if default_label
+                        else []
+                    ),
+
+                    key=(
+                        selected_test
+                        + "_cell_selection"
+                    ),
+                )
+            )
+
+
+            selected_cells = [
+                labels[
+                    label
+                ]
+
+                for label
+                in selected_labels
+            ]
+
+
+        else:
+
+            selected_cells = list(
+                dict.fromkeys(
+                    cell
+
+                    for cell
+                    in (
+                        lowest_cell,
+                        highest_cell,
+                    )
+
+                    if cell
+                )
+            )
+
+
+            st.caption(
+                "Die Auswahl basiert auf den "
+                "minimalen Zellspannungen während "
+                "der Hauptentladung."
+            )
+
+
+        if selected_cells:
+
+            graph_col, info_col = (
+                st.columns(
+                    [
+                        4,
+                        1.3,
+                    ]
+                )
+            )
+
+
+            with graph_col:
+                st.plotly_chart(
+                    cell_voltage_plot(
+                        cells,
+                        selected_cells,
+                    ),
+                    use_container_width=True,
+                )
+
+
+            with info_col:
+                render_graph_explanation(
+                    get_graph_explanation(
+                        learning,
+                        "cell_voltages",
+                    )
+                )
+
+
+        else:
+            st.info(
+                "Bitte mindestens eine "
+                "Zelle auswählen."
+            )
+
+
+        c1, c2, c3 = (
+            st.columns(3)
+        )
+
 
         with c1:
             st.metric(
                 "Zelle mit niedrigster Spannung",
-                cell_label(weakest_cell),
+
+                cell_label(
+                    cell_summary.get(
+                        "weakest_cell"
+                    )
+                ),
             )
+
 
         with c2:
             st.metric(
                 "Niedrigste Zellspannung",
-                f"{format_number(weakest_voltage, 4)} V",
+
+                metric_text(
+                    cell_summary.get(
+                        "weakest_cell_voltage_V"
+                    ),
+                    "V",
+                    4,
+                ),
             )
+
 
         with c3:
             st.metric(
                 "Max. Zellspannungsdifferenz",
-                f"{format_number(max_spread, 2)} mV",
+
+                metric_text(
+                    cell_summary.get(
+                        "maximum_spread_mV"
+                    ),
+                    "mV",
+                    2,
+                ),
             )
 
-        spread_figure = cell_spread_plot(
-            cells
+
+        spread_figure = (
+            cell_spread_plot(
+                cells
+            )
         )
 
-        if spread_figure is not None:
-            st.plotly_chart(
-                spread_figure,
-                use_container_width=True,
+
+        if (
+            spread_figure
+            is not None
+        ):
+
+            st.markdown(
+                "### Zellspannungsdifferenz"
             )
+
+
+            graph_col, info_col = (
+                st.columns(
+                    [
+                        4,
+                        1.3,
+                    ]
+                )
+            )
+
+
+            with graph_col:
+                st.plotly_chart(
+                    spread_figure,
+                    use_container_width=True,
+                )
+
+
+            with info_col:
+                render_graph_explanation(
+                    get_graph_explanation(
+                        learning,
+                        "cell_spread",
+                    )
+                )
+
 
         with st.expander(
             "Zellkennwerte verstehen"
         ):
+
             entries = [
                 (
                     "Zelle mit niedrigster Spannung",
                     "weakest_cell",
                 ),
+
                 (
                     "Niedrigste Zellspannung",
                     "weakest_cell_voltage_V",
                 ),
+
                 (
-                    "Maximale Zellspannungsdifferenz",
+                    "Maximale "
+                    "Zellspannungsdifferenz",
                     "maximum_spread_mV",
                 ),
+
                 (
-                    "Mittlere Zellspannungsdifferenz",
+                    "Mittlere "
+                    "Zellspannungsdifferenz",
                     "mean_spread_mV",
                 ),
             ]
 
-            for title, key in entries:
-                explanation = get_explanation(
-                    summary,
-                    "cells",
-                    key,
+
+            for (
+                title,
+                key,
+            ) in entries:
+
+                explanation = (
+                    get_kpi_explanation(
+                        summary,
+                        "cells",
+                        key,
+                    )
                 )
+
 
                 if explanation:
                     st.markdown(
-                        f"**{title}**"
+                        "**"
+                        + title
+                        + "**"
                     )
 
                     st.write(
@@ -1025,72 +2178,145 @@ with cells_tab:
                     )
 
 
-with temperature_tab:
-    st.plotly_chart(
-        temperature_plot(temperature),
-        use_container_width=True,
+# ============================================================
+# SECTION:
+# TEMPERATUR
+# ============================================================
+
+elif section == "Temperatur":
+
+    st.subheader(
+        "Thermisches Verhalten"
     )
 
-    maximum_temperature = summary[
-        "temperature"
-    ]["maximum_C"]
 
-    temperature_change = summary[
-        "temperature"
-    ]["temperature_change_C"]
+    t1, t2, t3 = (
+        st.columns(3)
+    )
 
-    maximum_spread = summary[
-        "temperature"
-    ]["maximum_spread_C"]
 
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
+    with t1:
         st.metric(
             "Maximale Temperatur",
-            f"{format_number(maximum_temperature, 2)} °C",
+
+            metric_text(
+                temperature_summary.get(
+                    "maximum_C"
+                ),
+                "°C",
+                2,
+            ),
         )
 
-    with c2:
+
+    with t2:
         st.metric(
             "Temperaturänderung Start–Ende",
-            f"{format_number(temperature_change, 2)} °C",
+
+            metric_text(
+                temperature_summary.get(
+                    "temperature_change_C"
+                ),
+                "°C",
+                2,
+            ),
         )
 
-    with c3:
+
+    with t3:
         st.metric(
             "Max. Temperaturdifferenz",
-            f"{format_number(maximum_spread, 2)} °C",
+
+            metric_text(
+                temperature_summary.get(
+                    "maximum_spread_C"
+                ),
+                "°C",
+                2,
+            ),
         )
+
+
+    if (
+        temperature is None
+        or
+        temperature.empty
+    ):
+        st.warning(
+            "Keine Temperaturdaten verfügbar."
+        )
+
+
+    else:
+        graph_col, info_col = (
+            st.columns(
+                [
+                    4,
+                    1.3,
+                ]
+            )
+        )
+
+
+        with graph_col:
+            st.plotly_chart(
+                temperature_plot(
+                    temperature
+                ),
+                use_container_width=True,
+            )
+
+
+        with info_col:
+            render_graph_explanation(
+                get_graph_explanation(
+                    learning,
+                    "temperature_progress",
+                )
+            )
+
 
     with st.expander(
         "Temperaturkennwerte verstehen"
     ):
+
         entries = [
             (
                 "Maximale Temperatur",
                 "maximum_C",
             ),
+
             (
                 "Temperaturänderung Start–Ende",
                 "temperature_change_C",
             ),
+
             (
                 "Maximale Temperaturdifferenz",
                 "maximum_spread_C",
             ),
         ]
 
-        for title, key in entries:
-            explanation = get_explanation(
-                summary,
-                "temperature",
-                key,
+
+        for (
+            title,
+            key,
+        ) in entries:
+
+            explanation = (
+                get_kpi_explanation(
+                    summary,
+                    "temperature",
+                    key,
+                )
             )
+
 
             if explanation:
                 st.markdown(
-                    f"**{title}**"
+                    "**"
+                    + title
+                    + "**"
                 )
 
                 st.write(
@@ -1098,162 +2324,125 @@ with temperature_tab:
                 )
 
 
-validation = summary[
-    "validation"
-]
+# ============================================================
+# SECTION:
+# LERNEN
+# ============================================================
 
+elif section == "Lernen":
 
-with validation_tab:
     st.subheader(
-        "Vergleich mit den Prüfstandsergebnissen"
-    )
-
-    validation_table = pd.DataFrame(
-        {
-            "Kennwert": [
-                "Ladekapazität",
-                "Ladeenergie",
-                "Entladekapazität",
-                "Entladeenergie",
-                "Energieeffizienz",
-            ],
-            "Abweichung [%]": [
-                validation.get(
-                    "charge_capacity_difference_pct"
-                ),
-                validation.get(
-                    "charge_energy_difference_pct"
-                ),
-                validation.get(
-                    "discharge_capacity_difference_pct"
-                ),
-                validation.get(
-                    "discharge_energy_difference_pct"
-                ),
-                validation.get(
-                    "energy_efficiency_difference_pct"
-                ),
-            ],
-        }
-    )
-
-    validation_table[
-        "Abweichung [%]"
-    ] = validation_table[
-        "Abweichung [%]"
-    ].round(5)
-
-    st.dataframe(
-        validation_table,
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    st.success(
-        "Die in Python berechneten Kennwerte stimmen "
-        "sehr gut mit den zugehörigen "
-        "Prüfstandsergebnissen überein."
-    )
-
-    tester_efficiency = validation.get(
-        "tester_energy_efficiency_pct"
-    )
-
-    if tester_efficiency is not None:
-        st.caption(
-            "Vom Prüfstand gespeicherte Energieeffizienz: "
-            f"{format_number(tester_efficiency, 3)} %"
-        )
-
-
-if view_mode == "Lernmodus":
-    st.divider()
-
-    st.header(
-        "Lernbereich"
-    )
-
-    (
-        objectives_tab,
-        facts_tab,
-        concepts_tab,
-        procedure_tab,
-        quiz_tab,
-        transfer_tab,
-    ) = st.tabs(
-        [
-            "Lernziele",
-            "Faktenwissen",
-            "Konzeptwissen",
-            "Vorgehen",
-            "Quiz & Reflexion",
-            "Transfer",
-        ]
+        "Lernmodus"
     )
 
 
-    with objectives_tab:
-        st.subheader(
-            "Was soll nach dieser Seite verstanden werden?"
-        )
-
-        for objective in learning.get(
+    objectives = (
+        learning.get(
             "learning_objectives",
             [],
-        ):
-            st.markdown(
-                f"- {objective}"
+        )
+    )
+
+
+    if objectives:
+
+        st.markdown(
+            "### Lernziele"
+        )
+
+
+        for objective in objectives:
+            st.write(
+                "• "
+                + str(
+                    objective
+                )
             )
 
 
-    with facts_tab:
-        for item in learning.get(
+    factual = (
+        learning.get(
             "factual_knowledge",
             [],
-        ):
-            with st.container(border=True):
-                st.markdown(
-                    f"### {item.get('title', 'Lerninhalt')}"
+        )
+    )
+
+
+    if factual:
+
+        st.markdown(
+            "### Grundlagen"
+        )
+
+
+        for item in factual:
+
+            with st.expander(
+                item.get(
+                    "title",
+                    "Lerninhalt",
                 )
+            ):
 
                 st.write(
-                    item.get("text", "")
+                    item.get(
+                        "text",
+                        "",
+                    )
                 )
 
-                if item.get("formula"):
+
+                if item.get(
+                    "formula"
+                ):
                     st.markdown(
                         "**Formel**"
                     )
 
-                    st.latex(
-                        item["formula"]
-                    )
-
-                if item.get("unit"):
-                    st.markdown(
-                        f"**Einheit:** {item['unit']}"
+                    st.write(
+                        item[
+                            "formula"
+                        ]
                     )
 
 
-    with concepts_tab:
-        st.write(
-            "Hier stehen die Zusammenhänge zwischen "
-            "den verschiedenen Messgrößen und "
-            "Kennwerten im Mittelpunkt."
-        )
+                if item.get(
+                    "unit"
+                ):
+                    st.caption(
+                        "Einheit: "
+                        + str(
+                            item[
+                                "unit"
+                            ]
+                        )
+                    )
 
-        for item in learning.get(
+
+    conceptual = (
+        learning.get(
             "conceptual_knowledge",
             [],
-        ):
-            question = item.get(
-                "question",
-                "Erklärung",
-            )
+        )
+    )
+
+
+    if conceptual:
+
+        st.markdown(
+            "### Zusammenhänge verstehen"
+        )
+
+
+        for item in conceptual:
 
             with st.expander(
-                question
+                item.get(
+                    "question",
+                    "Erklärung",
+                )
             ):
+
                 st.write(
                     item.get(
                         "answer",
@@ -1262,466 +2451,1161 @@ if view_mode == "Lernmodus":
                 )
 
 
-    with procedure_tab:
-        for item in learning.get(
+    procedural = (
+        learning.get(
             "procedural_knowledge",
             [],
-        ):
+        )
+    )
+
+
+    if procedural:
+
+        st.markdown(
+            "### Vorgehen"
+        )
+
+
+        for item in procedural:
+
             with st.expander(
                 item.get(
                     "title",
                     "Vorgehen",
-                ),
-                expanded=True,
-            ):
-                steps = item.get(
-                    "steps",
-                    [],
                 )
+            ):
 
-                for number, step in enumerate(
-                    steps,
+                for (
+                    number,
+                    step,
+                ) in enumerate(
+                    item.get(
+                        "steps",
+                        [],
+                    ),
                     start=1,
                 ):
+
                     st.write(
-                        f"{number}. {step}"
-                    )
-
-                if item.get("formula"):
-                    st.markdown(
-                        "**Formel**"
-                    )
-
-                    st.latex(
-                        item["formula"]
+                        f"{number}. "
+                        + str(
+                            step
+                        )
                     )
 
 
-    with quiz_tab:
-        st.subheader(
-            "Quiz"
-        )
+                if item.get(
+                    "formula"
+                ):
+                    st.caption(
+                        "Formel: "
+                        + str(
+                            item[
+                                "formula"
+                            ]
+                        )
+                    )
 
-        st.caption(
-            "Nach der Auswahl wird die Antwort geprüft "
-            "und eine fachliche Erklärung angezeigt."
-        )
 
-        for quiz in learning.get(
+    quizzes = (
+        learning.get(
             "quizzes",
             [],
+        )
+    )
+
+
+    if quizzes:
+
+        st.markdown(
+            "### Quiz"
+        )
+
+
+        for (
+            position,
+            quiz,
+        ) in enumerate(
+            quizzes,
+            start=1,
         ):
-            show_quiz(
-                quiz,
-                selected_test,
-            )
 
-        st.divider()
+            with st.container(
+                border=True
+            ):
 
-        st.subheader(
-            "Reflexionsfragen"
-        )
+                st.caption(
+                    f"Frage {position}"
+                )
 
-        st.write(
-            "Formuliere zuerst eine eigene Antwort. "
-            "Danach kannst du die hinterlegte mögliche "
-            "Antwort anzeigen und mit deiner eigenen "
-            "Überlegung vergleichen."
-        )
+                render_quiz(
+                    quiz,
+                    selected_test,
+                )
 
-        reflection_questions = learning.get(
+
+    reflections = (
+        learning.get(
             "reflection_questions",
             [],
         )
-
-        for index, question in enumerate(
-            reflection_questions
-        ):
-            show_reflection(
-                question,
-                index,
-                selected_test,
-            )
+    )
 
 
-    with transfer_tab:
-        st.write(
-            "Bei den Transferaufgaben soll das Gelernte "
-            "auf eine neue Mess- oder Problemsituation "
-            "übertragen werden."
+    if reflections:
+
+        st.markdown(
+            "### Reflexion"
         )
 
-        transfer_tasks = learning.get(
-            "transfer_tasks",
-            [],
-        )
 
-        for index, task in enumerate(
-            transfer_tasks
-        ):
-            show_transfer_task(
-                task,
-                index,
-                selected_test,
-            )
+        for question in reflections:
 
-        takeaways = learning.get(
-            "key_takeaways",
-            [],
-        )
+            with st.container(
+                border=True
+            ):
 
-        if takeaways:
-            st.divider()
-
-            st.subheader(
-                "Zentrale Erkenntnisse"
-            )
-
-            for takeaway in takeaways:
-                st.markdown(
-                    f"- {takeaway}"
+                render_reflection(
+                    question,
+                    selected_test,
                 )
 
 
-else:
-    st.divider()
+    transfer_tasks = (
+        learning.get(
+            "transfer_tasks",
+            [],
+        )
+    )
 
-    st.header(
+
+    if transfer_tasks:
+
+        st.markdown(
+            "### Transfer"
+        )
+
+
+        for task in transfer_tasks:
+
+            with st.container(
+                border=True
+            ):
+
+                render_transfer_task(
+                    task,
+                    selected_test,
+                )
+
+
+    takeaways = (
+        learning.get(
+            "key_takeaways",
+            [],
+        )
+    )
+
+
+    if takeaways:
+
+        st.markdown(
+            "### Zentrale Erkenntnisse"
+        )
+
+
+        for takeaway in takeaways:
+            st.write(
+                "• "
+                + str(
+                    takeaway
+                )
+            )
+
+
+# ============================================================
+# SECTION:
+# ANALYSE
+# ============================================================
+
+elif section == "Analyse":
+
+    st.subheader(
         "Erweiterte Analyse"
     )
 
+
     st.write(
-        """
-        Diese Ansicht dient der technischen Nachvollziehbarkeit
-        der Ergebnisse. Sie zeigt die ausgewerteten Ereignisse,
-        die verwendeten Berechnungsmethoden, die Validierung
-        gegenüber dem Prüfstand und die exportierte Schnittstelle.
+        "Hier werden die Ereignissegmentierung, "
+        "die Kennwerte des Hauptzyklus, die "
+        "Prüfstandsvalidierung sowie Zell- und "
+        "Temperaturkennwerte technisch "
+        "nachvollziehbar dargestellt."
+    )
+
+
+    # --------------------------------------------------------
+    # Additional analysis CSV files are loaded ONLY here.
+    # --------------------------------------------------------
+
+    main_cycle_table = (
+        read_optional_export_csv(
+            "main_cycle.csv",
+            selected_test,
+        )
+    )
+
+
+    validation_table = (
+        read_optional_export_csv(
+            "validation.csv",
+            selected_test,
+        )
+    )
+
+
+    cell_summary_table = (
+        read_optional_export_csv(
+            "cell_summary.csv",
+            selected_test,
+        )
+    )
+
+
+    temperature_summary_table = (
+        read_optional_export_csv(
+            "temperature_summary.csv",
+            selected_test,
+        )
+    )
+
+
+    # --------------------------------------------------------
+    # CALCULATION BASICS
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Berechnungsgrundlagen"
+    )
+
+
+    st.latex(
+        r"""
+        Q_{\mathrm{Ah}}
+        =
+        \frac{1}{3600}
+        \left|
+        \int_{t_0}^{t_1}
+        I(t)\,\mathrm{d}t
+        \right|
         """
     )
 
 
-    st.subheader(
-        "Ereignisübersicht"
+    st.latex(
+        r"""
+        E_{\mathrm{Wh}}
+        =
+        \frac{1}{3600}
+        \int_{t_0}^{t_1}
+        U(t)\,|I(t)|\,\mathrm{d}t
+        """
     )
+
+
+    st.latex(
+        r"""
+        \eta_E
+        =
+        \frac{
+            E_{\mathrm{Entladung}}
+        }{
+            E_{\mathrm{Ladung}}
+        }
+        \cdot 100\,\%
+        """
+    )
+
+
+    if number_of_cells > 1:
+
+        st.latex(
+            r"""
+            \Delta V(t)
+            =
+            V_{\mathrm{max}}(t)
+            -
+            V_{\mathrm{min}}(t)
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # EVENT TABLE
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Ereignisübersicht"
+    )
+
 
     st.caption(
-        "Die Lade- und Entladeereignisse werden getrennt "
-        "ausgewertet und anschließend für die Berechnung "
-        "der relevanten Kennwerte verwendet."
-    )
-
-    event_table = events.copy()
-
-    rename_map = {
-        "event_type": "Ereignistyp",
-        "event": "Nr.",
-        "event_number": "Nr.",
-        "start_s": "Start [s]",
-        "end_s": "Ende [s]",
-        "duration_s": "Dauer [s]",
-        "active_duration_s": "Aktive Dauer [s]",
-        "python_capacity_Ah": "Kapazität [Ah]",
-        "python_energy_Wh": "Energie [Wh]",
-        "mean_current_A": "Mittlerer Strom [A]",
-        "minimum_voltage_V": "Min. Spannung [V]",
-        "maximum_voltage_V": "Max. Spannung [V]",
-        "quantity_difference_div3600_pct":
-            "Kapazitätsabweichung [%]",
-        "energy_difference_div3600_pct":
-            "Energieabweichung [%]",
-    }
-
-    event_table = event_table.rename(
-        columns=rename_map
-    )
-
-    st.dataframe(
-        event_table,
-        use_container_width=True,
-        hide_index=True,
+        "Alle erkannten Lade- und Entladeereignisse "
+        "werden getrennt ausgewertet. Die Tabelle "
+        "enthält die Python-Ergebnisse und – sofern "
+        "verfügbar – die zugehörigen "
+        "Prüfstandsabweichungen."
     )
 
 
-    st.subheader(
-        "Kennwerte des Hauptzyklus"
+    if (
+        events is None
+        or
+        events.empty
+    ):
+
+        st.info(
+            "Keine Ereignistabelle verfügbar."
+        )
+
+
+    else:
+
+        event_table = (
+            events.copy()
+        )
+
+
+        event_table = (
+            event_table.rename(
+                columns={
+                    "event_type":
+                        "Ereignistyp",
+
+                    "event":
+                        "Nr.",
+
+                    "event_number":
+                        "Nr.",
+
+                    "start_s":
+                        "Start [s]",
+
+                    "end_s":
+                        "Ende [s]",
+
+                    "duration_s":
+                        "Dauer [s]",
+
+                    "active_duration_s":
+                        "Aktive Dauer [s]",
+
+                    "python_capacity_Ah":
+                        "Python Kapazität [Ah]",
+
+                    "tester_capacity_Ah_for_validation":
+                        "Prüfstand Kapazität [Ah]",
+
+                    "quantity_difference_div3600_pct":
+                        "Kapazitätsabweichung [%]",
+
+                    "python_energy_Wh":
+                        "Python Energie [Wh]",
+
+                    "tester_energy_Wh_for_validation":
+                        "Prüfstand Energie [Wh]",
+
+                    "energy_difference_div3600_pct":
+                        "Energieabweichung [%]",
+
+                    "mean_current_A":
+                        "Mittlerer Strom [A]",
+
+                    "minimum_voltage_V":
+                        "Min. Spannung [V]",
+
+                    "maximum_voltage_V":
+                        "Max. Spannung [V]",
+                }
+            )
+        )
+
+
+        st.dataframe(
+            event_table,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+
+    # --------------------------------------------------------
+    # MAIN CYCLE TABLE
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Kennwerte des Hauptzyklus"
     )
 
-    recharge_capacity = summary[
-        "capacity"
-    ]["recharge_Ah"]
 
-    capacity_balance = summary[
-        "capacity"
-    ]["capacity_balance_pct"]
+    if (
+        main_cycle_table
+        is not None
+        and
+        not main_cycle_table.empty
+    ):
 
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        st.metric(
-            "Entladekapazität",
-            f"{format_number(discharge_capacity, 3)} Ah",
-        )
-
-    with c2:
-        st.metric(
-            "Nachladekapazität",
-            f"{format_number(recharge_capacity, 3)} Ah",
-        )
-
-    with c3:
-        st.metric(
-            "Energieeffizienz",
-            f"{format_number(energy_efficiency, 3)} %",
-        )
-
-    with c4:
-        st.metric(
-            "Kapazitätsbilanz Gesamtmessung",
-            f"{format_number(capacity_balance, 2)} %",
+        display_table = (
+            main_cycle_table.copy()
         )
 
 
-    st.subheader(
-        "Auswertungsmethodik"
+        display_table = (
+            display_table.rename(
+                columns={
+                    "phase":
+                        "Phase",
+
+                    "event":
+                        "Ereignis",
+
+                    "start_s":
+                        "Start [s]",
+
+                    "end_s":
+                        "Ende [s]",
+
+                    "duration_s":
+                        "Dauer [s]",
+
+                    "active_duration_s":
+                        "Aktive Dauer [s]",
+
+                    "capacity_Ah":
+                        "Kapazität [Ah]",
+
+                    "energy_Wh":
+                        "Energie [Wh]",
+
+                    "mean_current_A":
+                        "Mittlerer Strom [A]",
+
+                    "minimum_voltage_V":
+                        "Min. Spannung [V]",
+
+                    "maximum_voltage_V":
+                        "Max. Spannung [V]",
+                }
+            )
+        )
+
+
+        st.dataframe(
+            display_table,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+
+    else:
+
+        c1, c2, c3, c4 = (
+            st.columns(4)
+        )
+
+
+        with c1:
+            st.metric(
+                "Entladekapazität",
+
+                metric_text(
+                    discharge_capacity,
+                    "Ah",
+                    3,
+                ),
+            )
+
+
+        with c2:
+            st.metric(
+                "Ladekapazität",
+
+                metric_text(
+                    capacity_summary.get(
+                        "recharge_Ah"
+                    ),
+                    "Ah",
+                    3,
+                ),
+            )
+
+
+        with c3:
+            st.metric(
+                "Energieeffizienz",
+
+                metric_text(
+                    energy_efficiency,
+                    "%",
+                    3,
+                ),
+            )
+
+
+        with c4:
+            st.metric(
+                "Kapazitätsbilanz",
+
+                metric_text(
+                    capacity_summary.get(
+                        "capacity_balance_pct"
+                    ),
+                    "%",
+                    2,
+                ),
+            )
+
+
+    # --------------------------------------------------------
+    # VALIDATION
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Prüfstandsvalidierung"
     )
 
-    with st.container(border=True):
-        st.markdown(
-            "### Kapazität"
+
+    st.write(
+        "Die Prüfstandswerte werden ausschließlich "
+        "nach der Python-KPI-Berechnung zur "
+        "Validierung herangezogen."
+    )
+
+
+    if (
+        validation_table
+        is not None
+        and
+        not validation_table.empty
+    ):
+
+        display_validation = (
+            validation_table.copy()
         )
 
-        st.write(
-            "Für jedes relevante Lade- beziehungsweise "
-            "Entladeereignis wird der Strom über die Zeit "
-            "integriert."
+
+        display_validation = (
+            display_validation.rename(
+                columns={
+                    "metric":
+                        "Kennwert",
+
+                    "python_value":
+                        "Python",
+
+                    "tester_value":
+                        "Prüfstand",
+
+                    "difference":
+                        "Differenz",
+
+                    "deviation_pct":
+                        "Abweichung [%]",
+
+                    "unit":
+                        "Einheit",
+                }
+            )
         )
 
-        st.latex(
-            r"""
-            Q_{\mathrm{Ah}}
-            =
-            \frac{1}{3600}
-            \int_{t_0}^{t_1} I(t)\,\mathrm{d}t
-            """
+
+        st.dataframe(
+            display_validation,
+            use_container_width=True,
+            hide_index=True,
         )
 
-        st.write(
-            "Der Faktor 1/3600 dient der Umrechnung "
-            "von Amperesekunden in Amperestunden."
+
+    else:
+
+        fallback_validation = (
+            pd.DataFrame(
+                {
+                    "Kennwert": [
+                        "Ladekapazität",
+                        "Ladeenergie",
+                        "Entladekapazität",
+                        "Entladeenergie",
+                        "Energieeffizienz",
+                    ],
+
+                    "Abweichung [%]": [
+                        validation_summary.get(
+                            "charge_capacity_difference_pct"
+                        ),
+
+                        validation_summary.get(
+                            "charge_energy_difference_pct"
+                        ),
+
+                        validation_summary.get(
+                            "discharge_capacity_difference_pct"
+                        ),
+
+                        validation_summary.get(
+                            "discharge_energy_difference_pct"
+                        ),
+
+                        validation_summary.get(
+                            "energy_efficiency_difference_pct"
+                        ),
+                    ],
+                }
+            )
         )
 
-        st.divider()
 
-        st.markdown(
-            "### Elektrische Leistung"
+        st.dataframe(
+            fallback_validation,
+            use_container_width=True,
+            hide_index=True,
         )
 
-        st.write(
-            "Aus Spannung und Strom wird die momentane "
-            "elektrische Leistung bestimmt."
+
+    tester_efficiency = (
+        validation_summary.get(
+            "tester_energy_efficiency_pct"
+        )
+    )
+
+
+    if (
+        tester_efficiency
+        is not None
+    ):
+
+        st.caption(
+            "Vom Prüfstand gespeicherte "
+            "Energieeffizienz: "
+            +
+            metric_text(
+                tester_efficiency,
+                "%",
+                3,
+            )
         )
 
-        st.latex(
-            r"""
-            P(t) = U(t)\cdot I(t)
-            """
+
+    # --------------------------------------------------------
+    # CELL SUMMARY
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Zellkennwerte"
+    )
+
+
+    if (
+        cell_summary_table
+        is not None
+        and
+        not cell_summary_table.empty
+    ):
+
+        display_cells = (
+            cell_summary_table.copy()
         )
 
-        st.divider()
 
-        st.markdown(
-            "### Elektrische Energie"
+        display_cells = (
+            display_cells.rename(
+                columns={
+                    "metric":
+                        "Kennwert",
+
+                    "value":
+                        "Wert",
+
+                    "unit":
+                        "Einheit",
+                }
+            )
         )
 
-        st.write(
-            "Die elektrische Energie wird durch Integration "
-            "der Leistung über die Zeit bestimmt."
+
+        st.dataframe(
+            display_cells,
+            use_container_width=True,
+            hide_index=True,
         )
 
-        st.latex(
-            r"""
-            E_{\mathrm{Wh}}
-            =
-            \frac{1}{3600}
-            \int_{t_0}^{t_1} P(t)\,\mathrm{d}t
-            =
-            \frac{1}{3600}
-            \int_{t_0}^{t_1} U(t)I(t)\,\mathrm{d}t
-            """
-        )
 
-        st.divider()
+    else:
 
-        st.markdown(
-            "### Energieeffizienz"
-        )
+        fallback_cells = [
+            {
+                "Kennwert":
+                    "Anzahl erkannter Zellen",
 
-        st.write(
-            "Für den Hauptzyklus wird die abgegebene "
-            "Entladeenergie mit der aufgenommenen "
-            "Ladeenergie verglichen."
-        )
+                "Wert":
+                    number_of_cells,
 
-        st.latex(
-            r"""
-            \eta_E
-            =
-            \frac{E_{\mathrm{Entladung}}}
-                 {E_{\mathrm{Ladung}}}
-            \cdot 100\,\%
-            """
-        )
+                "Einheit":
+                    "",
+            }
+        ]
 
-        st.divider()
 
-        st.markdown(
-            "### Zellspannungsdifferenz"
-        )
+        if number_of_cells > 0:
+
+            fallback_cells.extend(
+                [
+                    {
+                        "Kennwert":
+                            "Zelle mit "
+                            "niedrigster Spannung",
+
+                        "Wert":
+                            cell_label(
+                                cell_summary.get(
+                                    "weakest_cell"
+                                )
+                            ),
+
+                        "Einheit":
+                            "",
+                    },
+
+                    {
+                        "Kennwert":
+                            "Niedrigste Zellspannung",
+
+                        "Wert":
+                            cell_summary.get(
+                                "weakest_cell_voltage_V"
+                            ),
+
+                        "Einheit":
+                            "V",
+                    },
+                ]
+            )
+
 
         if number_of_cells > 1:
-            st.write(
-                "Für jeden Zeitpunkt wird die Differenz "
-                "zwischen der höchsten und der niedrigsten "
-                "gemessenen Zellspannung bestimmt."
+
+            fallback_cells.extend(
+                [
+                    {
+                        "Kennwert":
+                            "Maximale "
+                            "Zellspannungsdifferenz",
+
+                        "Wert":
+                            cell_summary.get(
+                                "maximum_spread_mV"
+                            ),
+
+                        "Einheit":
+                            "mV",
+                    },
+
+                    {
+                        "Kennwert":
+                            "Mittlere "
+                            "Zellspannungsdifferenz",
+
+                        "Wert":
+                            cell_summary.get(
+                                "mean_spread_mV"
+                            ),
+
+                        "Einheit":
+                            "mV",
+                    },
+                ]
             )
 
-            st.latex(
-                r"""
-                \Delta V(t)
-                =
-                V_{\mathrm{max}}(t)
-                -
-                V_{\mathrm{min}}(t)
-                """
-            )
 
-        else:
-            st.write(
-                "Bei einer Einzelzelle ist keine "
-                "Zellspannungsdifferenz zwischen mehreren "
-                "Zellen definiert."
-            )
-
-        st.divider()
-
-        st.markdown(
-            "### Ereignisbasierte Auswertung"
+        st.dataframe(
+            pd.DataFrame(
+                fallback_cells
+            ),
+            use_container_width=True,
+            hide_index=True,
         )
 
-        st.write(
-            "Die Messdatei kann mehrere getrennte Ladeereignisse "
-            "enthalten. Deshalb werden Lade- und Entladeabschnitte "
-            "zunächst einzeln identifiziert und ausgewertet. "
-            "Für die Kennwerte des Hauptzyklus werden anschließend "
-            "die zusammengehörenden Messabschnitte verwendet."
+
+    # --------------------------------------------------------
+    # TEMPERATURE SUMMARY
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Temperaturkennwerte"
+    )
+
+
+    if (
+        temperature_summary_table
+        is not None
+        and
+        not temperature_summary_table.empty
+    ):
+
+        display_temperature = (
+            temperature_summary_table.copy()
         )
 
 
-    st.subheader(
-        "Validierung der Berechnung"
+        display_temperature = (
+            display_temperature.rename(
+                columns={
+                    "metric":
+                        "Kennwert",
+
+                    "value":
+                        "Wert",
+
+                    "unit":
+                        "Einheit",
+                }
+            )
+        )
+
+
+        st.dataframe(
+            display_temperature,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+
+    else:
+
+        fallback_temperature = (
+            pd.DataFrame(
+                [
+                    {
+                        "Kennwert":
+                            "Maximale Temperatur",
+
+                        "Wert":
+                            temperature_summary.get(
+                                "maximum_C"
+                            ),
+
+                        "Einheit":
+                            "°C",
+                    },
+
+                    {
+                        "Kennwert":
+                            "Temperaturänderung",
+
+                        "Wert":
+                            temperature_summary.get(
+                                "temperature_change_C"
+                            ),
+
+                        "Einheit":
+                            "°C",
+                    },
+
+                    {
+                        "Kennwert":
+                            "Maximale "
+                            "Temperaturdifferenz",
+
+                        "Wert":
+                            temperature_summary.get(
+                                "maximum_spread_C"
+                            ),
+
+                        "Einheit":
+                            "°C",
+                    },
+                ]
+            )
+        )
+
+
+        st.dataframe(
+            fallback_temperature,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+
+    # --------------------------------------------------------
+    # DATA BASIS
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### Datenbasis des Dashboards"
     )
+
 
     st.write(
-        "Die in Python berechneten Werte werden mit den "
-        "vom Prüfstand gespeicherten Referenzwerten verglichen."
-    )
-
-    validation_table = pd.DataFrame(
-        {
-            "Kennwert": [
-                "Ladekapazität",
-                "Ladeenergie",
-                "Entladekapazität",
-                "Entladeenergie",
-                "Energieeffizienz",
-            ],
-            "Abweichung [%]": [
-                validation.get(
-                    "charge_capacity_difference_pct"
-                ),
-                validation.get(
-                    "charge_energy_difference_pct"
-                ),
-                validation.get(
-                    "discharge_capacity_difference_pct"
-                ),
-                validation.get(
-                    "discharge_energy_difference_pct"
-                ),
-                validation.get(
-                    "energy_efficiency_difference_pct"
-                ),
-            ],
-        }
-    )
-
-    validation_table[
-        "Abweichung [%]"
-    ] = validation_table[
-        "Abweichung [%]"
-    ].round(5)
-
-    st.dataframe(
-        validation_table,
-        use_container_width=True,
-        hide_index=True,
+        "Das Dashboard verwendet ausschließlich "
+        "bereits aufbereitete CSV- und JSON-Dateien. "
+        "Die analytischen Berechnungen werden nicht "
+        "erneut in Streamlit durchgeführt."
     )
 
 
-    st.subheader(
-        "Technische Schnittstelle"
+    analysis_info = (
+        manifest.get(
+            "analysis",
+            {},
+        )
     )
 
-    st.write(
+
+    def status_text(
+        value,
+    ):
+        if value is True:
+            return "Ja"
+
+        if value is False:
+            return "Nein"
+
+        if value is None:
+            return "–"
+
+        return str(
+            value
+        )
+
+
+    if analysis_info:
+
+        meta_left, meta_right = (
+            st.columns(2)
+        )
+
+
+        with meta_left:
+
+            with st.container(
+                border=True
+            ):
+
+                st.markdown(
+                    "#### Analyse"
+                )
+
+
+                st.markdown(
+                    "**KPI-Berechnung aus "
+                    "Vollauflösung**"
+                )
+
+                st.caption(
+                    status_text(
+                        analysis_info.get(
+                            "kpis_calculated_from_full_resolution_data"
+                        )
+                    )
+                )
+
+
+                st.markdown(
+                    "**Native Zeitstempel "
+                    "verwendet**"
+                )
+
+                st.caption(
+                    status_text(
+                        analysis_info.get(
+                            "native_timestamps_used_for_analysis"
+                        )
+                    )
+                )
+
+
+                st.markdown(
+                    "**Ereignisbasierte "
+                    "Segmentierung**"
+                )
+
+                st.caption(
+                    status_text(
+                        analysis_info.get(
+                            "event_based_segmentation"
+                        )
+                    )
+                )
+
+
+                st.markdown(
+                    "**Prüfstandsvalidierung**"
+                )
+
+                st.caption(
+                    status_text(
+                        analysis_info.get(
+                            "tester_validation_included"
+                        )
+                    )
+                )
+
+
+        with meta_right:
+
+            with st.container(
+                border=True
+            ):
+
+                st.markdown(
+                    "#### Visualisierung"
+                )
+
+
+                st.markdown(
+                    "**Visualisierungsdaten "
+                    "reduziert**"
+                )
+
+                st.caption(
+                    status_text(
+                        analysis_info.get(
+                            "visualization_data_downsampled"
+                        )
+                    )
+                )
+
+
+                maximum_rows = (
+                    analysis_info.get(
+                        "maximum_visualization_rows"
+                    )
+                )
+
+
+                st.markdown(
+                    "**Maximale "
+                    "Visualisierungszeilen**"
+                )
+
+
+                if (
+                    maximum_rows
+                    is not None
+                ):
+
+                    st.caption(
+                        f"{int(maximum_rows):,}"
+                        .replace(
+                            ",",
+                            ".",
+                        )
+                    )
+
+
+                else:
+
+                    st.caption(
+                        "–"
+                    )
+
+
+                st.markdown(
+                    "**Analytische Neuberechnung "
+                    "in Streamlit**"
+                )
+
+
+                dashboard_recalculates = (
+                    analysis_info.get(
+                        "dashboard_recalculates_kpis"
+                    )
+                )
+
+
+                if (
+                    dashboard_recalculates
+                    is False
+                ):
+                    st.caption(
+                        "Nein"
+                    )
+
+
+                else:
+                    st.caption(
+                        status_text(
+                            dashboard_recalculates
+                        )
+                    )
+
+
+    st.markdown(
         """
-        Die analytischen Berechnungen werden vollständig im
-        Python-Backend durchgeführt. Die exportierten JSON-
-        und CSV-Dateien enthalten bereits berechnete Kennwerte
-        und aufbereitete Visualisierungsdaten. Dieselbe
-        Schnittstelle kann später auch von DiBaLa beziehungsweise
-        Unity verwendet werden.
-        """
+        <div class="green-note">
+            <strong>
+                Trennung von Analyse und Visualisierung:
+            </strong>
+            Die vollständigen Messdaten werden für die
+            Ereigniserkennung und KPI-Berechnung verwendet.
+            Erst danach werden reduzierte Visualisierungsdaten
+            exportiert. Die Prüfstandswerte dienen ausschließlich
+            der nachträglichen Validierung.
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    st.write(
-        f"**Aktuell ausgewählter Test:** `{selected_test}`"
-    )
 
-    if source_file:
-        st.write(
-            f"**Quelldatei:** `{source_file}`"
+    # --------------------------------------------------------
+    # EXPORT FILES
+    # --------------------------------------------------------
+
+    with st.expander(
+        "Exportdateien"
+    ):
+
+        st.caption(
+            "Diese Dateien bilden gleichzeitig "
+            "die Schnittstelle für die spätere "
+            "DiBaLa-/Unity-Integration."
         )
 
-    d1, d2, d3 = st.columns(3)
 
-    with d1:
-        show_download_button(
-            "Kennwerte herunterladen",
-            "capacity_summary.json",
-            "application/json",
-            selected_test,
+        d1, d2, d3, d4 = (
+            st.columns(4)
         )
 
-    with d2:
-        show_download_button(
-            "Ereignisdaten herunterladen",
-            "events.csv",
-            "text/csv",
-            selected_test,
-        )
 
-    with d3:
-        show_download_button(
-            "Lerninhalte herunterladen",
-            "learning_content.json",
-            "application/json",
-            selected_test,
-        )
+        with d1:
+            show_download_button(
+                "Kennwerte",
+                "capacity_summary.json",
+                "application/json",
+                selected_test,
+            )
 
-    if manifest:
-        with st.expander(
-            "Schnittstellenbeschreibung anzeigen"
-        ):
-            st.json(
-                manifest
+
+        with d2:
+            show_download_button(
+                "Ereignisse",
+                "events.csv",
+                "text/csv",
+                selected_test,
+            )
+
+
+        with d3:
+            show_download_button(
+                "Validierung",
+                "validation.csv",
+                "text/csv",
+                selected_test,
+            )
+
+
+        with d4:
+            show_download_button(
+                "Lerninhalte",
+                "learning_content.json",
+                "application/json",
+                selected_test,
             )

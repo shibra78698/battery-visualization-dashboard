@@ -139,25 +139,7 @@ with ocv_col:
                     f"{count} Messungen verfügbar"
                 )
 
-            temperatures = status[
-                "ocv_temperatures"
-            ]
-
-            if temperatures:
-                temperature_text = (
-                    " · ".join(
-                        format_temperature(
-                            value
-                        )
-                        for value
-                        in temperatures
-                    )
-                )
-
-                st.caption(
-                    "Temperaturen: "
-                    + temperature_text
-                )
+            
 
         else:
             st.info(
