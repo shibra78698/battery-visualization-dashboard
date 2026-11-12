@@ -596,6 +596,7 @@ def build_voltage_current_plot(
         title_text=(
             "Strom [A]"
         ),
+        range=[-20, 55],
         secondary_y=True,
     )
 
